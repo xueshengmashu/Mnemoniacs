@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="漢字音">
+<link rel="manifest" href="/Mnemoniacs/manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>漢字音 Mnemonics</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#efefec;--text:#1a1a18;--text2:#6b6b67;--text3:#9a9a95;--border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);--green:#1D9E75;--green-bg:#E1F5EE;--amber:#EF9F27;--amber-bg:#FAEEDA;--amber-text:#633806;--coral:#D85A30;--coral-bg:#FAECE7;--coral-text:#993C1D;--r:12px;--rs:8px;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#f0f0ec;--text2:#9a9a95;--text3:#6b6b67;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.2);--green-bg:#0a3326;--amber-bg:#2e1f08;--amber-text:#FAC775;--coral-bg:#2e1208;--coral-text:#F09575}}
+html,body{height:100%;background:var(--bg3);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:var(--text)}
+.app{max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column;background:var(--bg3)}
+.hdr{padding:calc(12px + var(--st)) 16px 10px;background:var(--bg);border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hdr-t{font-size:18px;font-weight:600}.hdr-s{font-size:12px;color:var(--text2);margin-top:1px}
+.nav{display:flex;background:var(--bg);border-bottom:.5px solid var(--border);flex-shrink:0}
+.nb{flex:1;padding:10px 4px;font-size:13px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s}
+.nb.active{color:var(--text);border-bottom-color:var(--text)}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(16px + var(--sb))}
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.st{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;text-align:center}
+.st-n{font-size:24px;font-weight:600}.st-l{font-size:11px;color:var(--text2);margin-top:2px}
+.pw{background:var(--bg2);border-radius:4px;height:5px;overflow:hidden;margin-bottom:16px}
+.pf{height:100%;background:var(--green);border-radius:4px;transition:width .4s}
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.sc{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .12s}
+.sc:active{transform:scale(.97)}.sc.has{border-left:3px solid var(--green)}
+.sn{font-size:22px;font-weight:600;letter-spacing:1px}.ss{font-size:11px;color:var(--text2);margin-top:3px}
+.sa{font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.tr{padding:10px 0;border-bottom:.5px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.tr:last-child{border-bottom:none}
+.tp{font-size:18px;font-weight:600;min-width:54px;color:var(--text)}
+.tm{font-size:13px;color:var(--text2);flex:1;line-height:1.4;padding-top:2px}
+.rare-tag{font-size:10px;color:var(--amber-text);background:var(--amber-bg);border-radius:3px;padding:1px 5px;margin-left:4px}
+.ban{border-radius:var(--rs);padding:10px 12px;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:12px;line-height:1.4}
+.ban.w{background:var(--amber-bg);color:var(--amber-text);border:.5px solid var(--amber)}
+.inp{width:100%;padding:12px;border:.5px solid var(--border2);border-radius:var(--rs);font-size:15px;font-family:inherit;color:var(--text);background:var(--bg);outline:none}
+.inp:focus{border-color:var(--text)}
+textarea.inp{min-height:90px;resize:none;line-height:1.5}
+.sd{background:var(--bg2);border-radius:var(--rs);padding:12px;font-size:14px;line-height:1.6;margin-bottom:10px;min-height:50px}
+.sd.empty{color:var(--text3);font-style:italic}
+.rb{width:100%;padding:15px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text);transition:all .15s;margin-bottom:10px}
+.rb:active{transform:scale(.98)}.rb.rec{background:var(--coral-bg);border-color:var(--coral);color:var(--coral-text)}
+.br{display:flex;gap:8px}
+.btn{flex:1;padding:12px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);font-size:15px;font-weight:500;cursor:pointer;color:var(--text);text-align:center;transition:all .12s}
+.btn:active{transform:scale(.97)}.btn.p{background:var(--text);color:var(--bg);border-color:var(--text)}
+.bb{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text2);cursor:pointer;padding:0 0 14px;background:none;border:none;font-family:inherit}
+.bs{font-size:52px;font-weight:700;text-align:center;letter-spacing:2px;margin-bottom:6px}
+.rs{text-align:center;font-size:13px;color:var(--text2);margin-bottom:20px}
+.rv{padding:12px;border-radius:var(--rs);background:var(--bg2);margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .12s}
+.rv:active{background:var(--bg3)}
+.rl{display:flex;align-items:center;gap:12px}
+.rp{font-size:17px;font-weight:600;min-width:44px}
+.rm{font-size:13px;color:var(--text2)}.rm.rev{color:var(--text)}
+.rstory{font-size:13px;color:var(--text);line-height:1.6;padding:10px 12px;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rs);margin-bottom:8px;display:none}
+.gr{display:flex;gap:8px;margin-top:14px}
+.gb{flex:1;padding:14px 4px 10px;border:.5px solid var(--border);border-radius:var(--rs);background:var(--bg);font-size:26px;cursor:pointer;text-align:center;transition:all .12s}
+.gb:active{transform:scale(.95);background:var(--bg2)}
+.gl{font-size:11px;color:var(--text2);display:block;margin-top:4px}
+.es{text-align:center;padding:48px 24px}
+.ei{font-size:48px;margin-bottom:14px}
+.es p{font-size:15px;color:var(--text2);line-height:1.6}
+.ht{font-size:12px;color:var(--text3);text-align:center;margin-top:8px}
+.pulse{animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.screen{display:none}.screen.active{display:block}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.ftag{padding:6px 12px;border:.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;background:var(--bg);color:var(--text2);transition:all .12s}
+.ftag.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div><div class="hdr-t">漢字音 Mnemonics</div><div class="hdr-s" id="hdr-s">Build your syllable stories</div></div>
+    <span style="font-size:28px">🧠</span>
+  </div>
+  <div class="nav">
+    <button class="nb active" id="nav-build" onclick="show('build')">Build</button>
+    <button class="nb" id="nav-review" onclick="show('review')">Review</button>
+    <button class="nb" id="nav-words" onclick="show('words')">Words</button>
+  </div>
+  <div class="scroll">
+    <div class="screen active" id="screen-build">
+      <div class="sr">
+        <div class="st"><div class="st-n" id="s-total">0</div><div class="st-l">syllables</div></div>
+        <div class="st"><div class="st-n" id="s-done">0</div><div class="st-l">with story</div></div>
+        <div class="st"><div class="st-n" id="s-due">0</div><div class="st-l">due today</div></div>
+      </div>
+      <div class="pw"><div class="pf" id="pbar" style="width:0%"></div></div>
+      
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button onclick="exportStories()" style="flex:1;padding:10px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);font-size:13px;font-weight:500;cursor:pointer;color:var(--text);">⬇️ Export backup</button>
+        <button onclick="importStories()" style="flex:1;padding:10px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);font-size:13px;font-weight:500;cursor:pointer;color:var(--text);">⬆️ Import backup</button>
+      </div>
+<div class="filter-row">
+        <div class="ftag on" id="f-all" onclick="setFilter('all')">All</div>
+        <div class="ftag" id="f-todo" onclick="setFilter('todo')">No story</div>
+        <div class="ftag" id="f-done" onclick="setFilter('done')">Has story</div>
+        <div class="ftag" id="f-due" onclick="setFilter('due')">Due today</div>
+      </div>
+      <div class="sg" id="grid"></div>
+    </div>
+    <div class="screen" id="screen-detail"><div id="det"></div></div>
+    <div class="screen" id="screen-review"><div id="rev"></div></div>
+    <div class="screen" id="screen-words">
+      <div class="es"><div class="ei">🔗</div>
+      <p>Two and three-syllable words coming soon.<br><br>Once you've built enough syllable stories, you'll tap each syllable to peek at its story, then record your bridge story for the combined word meaning.</p></div>
+    </div>
+  </div>
+</div>
+<script>
+const ALL_SYLLABLES = {
+  // --- Already in user's doc (keep stories) ---
+  bi: { tones: [{ pinyin: "bī", meaning: "to force / compel" },{ pinyin: "bí", meaning: "nose" },{ pinyin: "bǐ", meaning: "pen / writing brush" },{ pinyin: "bì", meaning: "currency / must / wall" }] },
+  yan: { tones: [{ pinyin: "yān", meaning: "smoke / cigarette" },{ pinyin: "yán", meaning: "salt / strict" },{ pinyin: "yǎn", meaning: "eye / to perform" },{ pinyin: "yàn", meaning: "wild goose / to swallow" }] },
+  gan: { tones: [{ pinyin: "gān", meaning: "dry / clean" },{ pinyin: "gán", meaning: "slop / dishwater", rare: true },{ pinyin: "gǎn", meaning: "to dare / to rush" },{ pinyin: "gàn", meaning: "to work / to do" }] },
+  wen: { tones: [{ pinyin: "wēn", meaning: "warm / temperature" },{ pinyin: "wén", meaning: "culture / language / writing" },{ pinyin: "wěn", meaning: "to kiss / steady" },{ pinyin: "wèn", meaning: "to ask / to question" }] },
+  tang: { tones: [{ pinyin: "tāng", meaning: "soup / hot water" },{ pinyin: "táng", meaning: "sugar / candy" },{ pinyin: "tǎng", meaning: "to lie down" },{ pinyin: "tàng", meaning: "burning hot / to scald" }] },
+  li: { tones: [{ pinyin: "lī", meaning: "purring / light sound", rare: true },{ pinyin: "lí", meaning: "pear / to leave / away from" },{ pinyin: "lǐ", meaning: "gift / politeness / inside" },{ pinyin: "lì", meaning: "strength / power / sharp" }] },
+  shi: { tones: [{ pinyin: "shī", meaning: "poem / teacher / to lose" },{ pinyin: "shí", meaning: "ten / time / to eat / stone" },{ pinyin: "shǐ", meaning: "shit / history / to make" },{ pinyin: "shì", meaning: "city / market / to be / matter" }] },
+  yi: { tones: [{ pinyin: "yī", meaning: "one / medical / clothes" },{ pinyin: "yí", meaning: "to move / shift / aunt (maternal)" },{ pinyin: "yǐ", meaning: "chair / already / by means of" },{ pinyin: "yì", meaning: "meaning / idea / hundred million" }] },
+  ma: { tones: [{ pinyin: "mā", meaning: "mother / mom" },{ pinyin: "má", meaning: "hemp / numb / sesame" },{ pinyin: "mǎ", meaning: "horse / weight unit" },{ pinyin: "mà", meaning: "to scold / curse" }] },
+  ba: { tones: [{ pinyin: "bā", meaning: "eight / to stick to" },{ pinyin: "bá", meaning: "to pull out / uproot" },{ pinyin: "bǎ", meaning: "handle / to hold / (measure word)" },{ pinyin: "bà", meaning: "dad / father / dam / tyrant" }] },
+  qi: { tones: [{ pinyin: "qī", meaning: "seven / wife / lacquer" },{ pinyin: "qí", meaning: "to ride / strange / chess" },{ pinyin: "qǐ", meaning: "to rise / get up / to start" },{ pinyin: "qì", meaning: "air / gas / energy / steam" }] },
+  gu: { tones: [{ pinyin: "gū", meaning: "aunt / to estimate / lone" },{ pinyin: "gǔ", meaning: "drum / bone / ancient / stock (shares)" },{ pinyin: "gù", meaning: "ancient / story / to hire / solid" },{ pinyin: "gù", meaning: "ancient / story / to hire", rare: false }] },
+
+  // --- B ---
+  bao: { tones: [{ pinyin: "bāo", meaning: "to wrap / package / bun" },{ pinyin: "báo", meaning: "thin / flimsy" },{ pinyin: "bǎo", meaning: "full (after eating) / precious / treasure" },{ pinyin: "bào", meaning: "to hug / newspaper / to explode / to report" }] },
+  bei: { tones: [{ pinyin: "bēi", meaning: "cup / sad / low" },{ pinyin: "béi", meaning: "cowrie shell (ancient currency)", rare: true },{ pinyin: "běi", meaning: "north" },{ pinyin: "bèi", meaning: "back (of body) / blanket / passive marker / to recite" }] },
+  ben: { tones: [{ pinyin: "bēn", meaning: "to rush / to run toward" },{ pinyin: "bén", meaning: "energetic / vigorous (classical)", rare: true },{ pinyin: "běn", meaning: "root / origin / this / volume (books)" },{ pinyin: "bèn", meaning: "stupid / clumsy" }] },
+  bian: { tones: [{ pinyin: "biān", meaning: "side / edge / border / to weave" },{ pinyin: "bián", meaning: "flat tablet / appears in 便宜 piányí compounds", rare: true },{ pinyin: "biǎn", meaning: "flat / to diminish / plaque" },{ pinyin: "biàn", meaning: "to change / convenient / everywhere / (defecate)" }] },
+  bing: { tones: [{ pinyin: "bīng", meaning: "ice / soldier / weapon" },{ pinyin: "bíng", meaning: "appears in 屏 (bǐng/píng) compounds — to hold breath", rare: true },{ pinyin: "bǐng", meaning: "third (in a series) / to hold / flat bread" },{ pinyin: "bìng", meaning: "illness / sick / and also" }] },
+  bo: { tones: [{ pinyin: "bō", meaning: "wave / to broadcast / spinach" },{ pinyin: "bó", meaning: "uncle / rich / to refute / ship" },{ pinyin: "bǒ", meaning: "lame / limping — appears in 跛脚 bǒjiǎo", rare: true },{ pinyin: "bò", meaning: "thin silk / (rare)", rare: true }] },
+  bu: { tones: [{ pinyin: "bū", meaning: "to catch / arrest — appears in 逮捕 dàibǔ (to arrest)", rare: true },{ pinyin: "bú", meaning: "no / not (alternate form)" },{ pinyin: "bǔ", meaning: "to repair / to supplement / to feed" },{ pinyin: "bù", meaning: "no / not / step / cloth / department" }] },
+
+  // --- C ---
+  cai: { tones: [{ pinyin: "cāi", meaning: "to guess" },{ pinyin: "cái", meaning: "talent / wealth / just now / material" },{ pinyin: "cǎi", meaning: "to pick / color / to step on" },{ pinyin: "cài", meaning: "vegetable / dish / cuisine" }] },
+  can: { tones: [{ pinyin: "cān", meaning: "meal / to participate / ginseng" },{ pinyin: "cán", meaning: "silkworm /残: remnant / cruel" },{ pinyin: "cǎn", meaning: "miserable / tragic" },{ pinyin: "càn", meaning: "brilliant / glittering" }] },
+  cao: { tones: [{ pinyin: "cāo", meaning: "to grasp / to operate / exercise" },{ pinyin: "cáo", meaning: "trough / crew / Cao (surname)" },{ pinyin: "cǎo", meaning: "grass / draft / careless" },{ pinyin: "cào", meaning: "fuck (vulgar)" }] },
+  ce: { tones: [{ pinyin: "cē", meaning: "side / survey", rare: true },{ pinyin: "cé", meaning: "archaic variant of 侧 (cè) — side / to survey", rare: true },{ pinyin: "cè", meaning: "toilet / survey / plan / booklet" }] },
+  ceng: { tones: [{ pinyin: "cēng", meaning: "to rub / scrape — appears in 蹭 (cèng, to mooch)", rare: true },{ pinyin: "céng", meaning: "floor / storey / layer / once (in the past)" },{ pinyin: "cěng", meaning: "archaic variant — appears in dialectal 蹭 compounds", rare: true },{ pinyin: "cèng", meaning: "to mooch / freeload" }] },
+  cha: { tones: [{ pinyin: "chā", meaning: "to insert / fork / differ" },{ pinyin: "chá", meaning: "tea / to investigate / to check" },{ pinyin: "chǎ", meaning: "to spread legs / fork (road)" },{ pinyin: "chà", meaning: "to differ / fork / branch / amazed" }] },
+  chai: { tones: [{ pinyin: "chāi", meaning: "to tear apart / to dismantle" },{ pinyin: "chái", meaning: "firewood / jackal" },{ pinyin: "chǎi", meaning: "archaic variant of 拆 (chāi) — to tear apart / dismantle", rare: true },{ pinyin: "chài", meaning: "archaic — appears in 差 (chāi/chà) variant / to send on errand", rare: true }] },
+  chan: { tones: [{ pinyin: "chān", meaning: "to mix / to support (someone walking)" },{ pinyin: "chán", meaning: "to wrap around / to pester / Zen (Buddhism)" },{ pinyin: "chǎn", meaning: "to give birth / production / property" },{ pinyin: "chàn", meaning: "to tremble / to confess (Buddhism)" }] },
+  chang: { tones: [{ pinyin: "chāng", meaning: "prosperous / Chang (name)" },{ pinyin: "cháng", meaning: "long / always / often / intestine" },{ pinyin: "chǎng", meaning: "factory / field / open space" },{ pinyin: "chàng", meaning: "to sing / to advocate / smooth" }] },
+  chao: { tones: [{ pinyin: "chāo", meaning: "to exceed / to copy / to stir-fry" },{ pinyin: "cháo", meaning: "dynasty / tide / toward / to face" },{ pinyin: "chǎo", meaning: "to quarrel / to fry / noisy" },{ pinyin: "chào", meaning: "archaic variant of 潮 (cháo) — tide / dynasty / toward", rare: true }] },
+  che: { tones: [{ pinyin: "chē", meaning: "vehicle / car / to turn (a lathe)" },{ pinyin: "ché", meaning: "archaic variant of 车 (chē) — vehicle / car", rare: true },{ pinyin: "chě", meaning: "to pull / to chat / musical note" },{ pinyin: "chè", meaning: "to penetrate / to withdraw / thorough" }] },
+  chen: { tones: [{ pinyin: "chēn", meaning: "to glare / angry" },{ pinyin: "chén", meaning: "morning / dust / minister / to sink" },{ pinyin: "chěn", meaning: "archaic variant of 趁 (chèn) — to take advantage of", rare: true },{ pinyin: "chèn", meaning: "to match / lining / to take advantage of" }] },
+  cheng: { tones: [{ pinyin: "chēng", meaning: "to call / to weigh / to praise" },{ pinyin: "chéng", meaning: "city / to become / to succeed / sincere" },{ pinyin: "chěng", meaning: "to show off / to indulge" },{ pinyin: "chèng", meaning: "scale / steelyard" }] },
+  chi: { tones: [{ pinyin: "chī", meaning: "to eat" },{ pinyin: "chí", meaning: "pool / pond / slow / to hold" },{ pinyin: "chǐ", meaning: "ruler (tool) / tooth / shame" },{ pinyin: "chì", meaning: "red / to scold / wings" }] },
+  chong: { tones: [{ pinyin: "chōng", meaning: "to rush / to rinse / to punch / soar" },{ pinyin: "chóng", meaning: "insect / worm / again / repeat" },{ pinyin: "chǒng", meaning: "to pamper / to favor / pet" },{ pinyin: "chòng", meaning: "strong-smelling / facing toward" }] },
+  chou: { tones: [{ pinyin: "chōu", meaning: "to draw out / to smoke / to whip" },{ pinyin: "chóu", meaning: "enemy / silk / worry / dense" },{ pinyin: "chǒu", meaning: "ugly / clown / shame" },{ pinyin: "chòu", meaning: "smelly / stinky" }] },
+  chu: { tones: [{ pinyin: "chū", meaning: "to go out / to exit / to produce" },{ pinyin: "chú", meaning: "kitchen / to remove / except" },{ pinyin: "chǔ", meaning: "to store / to handle / place" },{ pinyin: "chù", meaning: "place / to touch / to punish" }] },
+  chuan: { tones: [{ pinyin: "chuān", meaning: "to wear / to pierce / river / Sichuan" },{ pinyin: "chuán", meaning: "boat / to pass on / to transmit" },{ pinyin: "chuǎn", meaning: "to gasp / to pant" },{ pinyin: "chuàn", meaning: "string / to connect / to visit" }] },
+  chuang: { tones: [{ pinyin: "chuāng", meaning: "window / sore / wound" },{ pinyin: "chuáng", meaning: "bed" },{ pinyin: "chuǎng", meaning: "to rush in / to temper oneself" },{ pinyin: "chuàng", meaning: "to create / to initiate" }] },
+  chui: { tones: [{ pinyin: "chuī", meaning: "to blow / to play (wind instrument) / to boast" },{ pinyin: "chuí", meaning: "to hang / hammer / to beat" },{ pinyin: "chuǐ", meaning: "archaic variant of 吹 (chuī) — to blow / to play wind instrument", rare: true },{ pinyin: "chuì", meaning: "archaic — appears in 吹 (chuī) blown wind compounds", rare: true }] },
+  chun: { tones: [{ pinyin: "chūn", meaning: "spring (season) / lust" },{ pinyin: "chún", meaning: "pure / lips / alcohol" },{ pinyin: "chǔn", meaning: "stupid / clumsy" },{ pinyin: "chùn", meaning: "archaic variant — appears in 春 (chūn, spring) classical forms", rare: true }] },
+  ci: { tones: [{ pinyin: "cī", meaning: "uneven / ragged", rare: true },{ pinyin: "cí", meaning: "word / speech / porcelain / magnetic / this" },{ pinyin: "cǐ", meaning: "this / here" },{ pinyin: "cì", meaning: "next / second / to stab / thorn / to visit" }] },
+  cong: { tones: [{ pinyin: "cōng", meaning: "green onion / hastily" },{ pinyin: "cóng", meaning: "from / since / to follow / cluster" },{ pinyin: "cǒng", meaning: "archaic variant — appears in 丛 (cóng, cluster) forms", rare: true },{ pinyin: "còng", meaning: "archaic variant of 从 (cóng) — to follow / from", rare: true }] },
+  cou: { tones: [{ pinyin: "còu", meaning: "to gather / to move close / to happen to" },{ pinyin: "cóu", meaning: "appears in 凑 (còu) variants — to pool together", rare: true },{ pinyin: "cǒu", meaning: "archaic variant of 凑 — to gather / assemble", rare: true },{ pinyin: "còu", meaning: "to gather / to pool together" }] },
+  cu: { tones: [{ pinyin: "cū", meaning: "thick / coarse / rough / crude" },{ pinyin: "cú", meaning: "appears in 粗 (cū) dialectal variants — rough / coarse", rare: true },{ pinyin: "cǔ", meaning: "appears in 醋 (cù) classical variants — vinegar / jealousy", rare: true },{ pinyin: "cù", meaning: "vinegar / crowded / sudden / to urge" }] },
+  cuan: { tones: [{ pinyin: "cuān", meaning: "to boil briefly / to flee" },{ pinyin: "cuán", meaning: "to gather / to save up" },{ pinyin: "cuǎn", meaning: "archaic variant of 蹿 (cuān) — to leap / to flee", rare: true },{ pinyin: "cuàn", meaning: "to usurp / to flee / to edit" }] },
+  cui: { tones: [{ pinyin: "cuī", meaning: "to urge / to hasten / to break" },{ pinyin: "cuí", meaning: "jade-green / brittle" },{ pinyin: "cuǐ", meaning: "brilliant / sparkling — appears in 璀璨 cuǐcàn (dazzling)", rare: true },{ pinyin: "cuì", meaning: "pure / green / exhausted / crispy" }] },
+  cun: { tones: [{ pinyin: "cūn", meaning: "village" },{ pinyin: "cún", meaning: "to exist / to save / to deposit" },{ pinyin: "cǔn", meaning: "to estimate / to ponder" },{ pinyin: "cùn", meaning: "inch (Chinese unit) / a tiny bit" }] },
+  cuo: { tones: [{ pinyin: "cuō", meaning: "to rub / to twist / to bring together" },{ pinyin: "cuó", meaning: "acne / pimple" },{ pinyin: "cuǒ", meaning: "archaic variant — appears in 撮 (cuō/cuò) compounds", rare: true },{ pinyin: "cuò", meaning: "wrong / mistake / to interlace / file (tool)" }] },
+
+  // --- D ---
+  da: { tones: [{ pinyin: "dā", meaning: "to answer / to build / to hang over" },{ pinyin: "dá", meaning: "to reach / to answer / dozen" },{ pinyin: "dǎ", meaning: "to hit / to play / to do" },{ pinyin: "dà", meaning: "big / large / great" }] },
+  dai: { tones: [{ pinyin: "dāi", meaning: "to stay / dull / blank" },{ pinyin: "dái", meaning: "slow / stupid — appears in 逮 (dǎi/dài, to catch)", rare: true },{ pinyin: "dǎi", meaning: "to catch / bad / evil" },{ pinyin: "dài", meaning: "to wear / to bring / to represent / generation / belt" }] },
+  dan: { tones: [{ pinyin: "dān", meaning: "single / red / bill / to shoulder" },{ pinyin: "dán", meaning: "appears in 担 (dān/dàn) variants — burden / load", rare: true },{ pinyin: "dǎn", meaning: "gall bladder / courage / bold" },{ pinyin: "dàn", meaning: "egg / bullet / but / light (color) / bland" }] },
+  dang: { tones: [{ pinyin: "dāng", meaning: "to be / should / sound of a bell" },{ pinyin: "dáng", meaning: "appears in 当 (dāng/dàng) variants — just at that moment", rare: true },{ pinyin: "dǎng", meaning: "party (political) / to block" },{ pinyin: "dàng", meaning: "to swing / proper / file / that time" }] },
+  dao: { tones: [{ pinyin: "dāo", meaning: "knife / blade" },{ pinyin: "dáo", meaning: "appears in 捣 (dǎo) variants — to pound / to disturb", rare: true },{ pinyin: "dǎo", meaning: "to fall / to pour / to fail / island" },{ pinyin: "dào", meaning: "road / way / to arrive / Taoism / to say" }] },
+  de: { tones: [{ pinyin: "dē", meaning: "appears in 的 (de) variants — structural particle (dialectal)", rare: true },{ pinyin: "dé", meaning: "virtue / morality / to get / Germany" },{ pinyin: "dě", meaning: "appears in 得 (děi) variant — must / need to", rare: true },{ pinyin: "de", meaning: "structural particle (的/得/地)" }] },
+  deng: { tones: [{ pinyin: "dēng", meaning: "lamp / light / to climb" },{ pinyin: "déng", meaning: "appears in 等 compounds — grade / rank (variant)", rare: true },{ pinyin: "děng", meaning: "to wait / rank / equal / etc." },{ pinyin: "dèng", meaning: "to stare / stool / to filter" }] },
+  di: { tones: [{ pinyin: "dī", meaning: "low / to drop / taxi / flute" },{ pinyin: "dí", meaning: "enemy / truly / indeed" },{ pinyin: "dǐ", meaning: "bottom / base / to resist" },{ pinyin: "dì", meaning: "earth / ground / place / younger brother / (ordinal marker)" }] },
+  dian: { tones: [{ pinyin: "diān", meaning: "top / to carry on head / to jolt" },{ pinyin: "dián", meaning: "archaic variant of 点 (diǎn) — dot / point / a little", rare: true },{ pinyin: "diǎn", meaning: "dot / point / o'clock / to light / a little" },{ pinyin: "diàn", meaning: "electricity / shop / to fill / palace hall" }] },
+  diao: { tones: [{ pinyin: "diāo", meaning: "to hold in mouth / marten / to wither" },{ pinyin: "diáo", meaning: "archaic variant of 吊 (diào) — to hang / to mourn", rare: true },{ pinyin: "diǎo", meaning: "penis (vulgar)" },{ pinyin: "diào", meaning: "to hang / to fish / to lose / tune / to transfer" }] },
+  die: { tones: [{ pinyin: "diē", meaning: "dad (dialectal) / to fall" },{ pinyin: "dié", meaning: "butterfly / plate / to fold / to repeat" },{ pinyin: "diě", meaning: "appears in 跌 (diē) variants — to tumble / fall price", rare: true },{ pinyin: "diè", meaning: "archaic variant — appears in 迭 (dié, repeatedly) compounds", rare: true }] },
+  ding: { tones: [{ pinyin: "dīng", meaning: "fourth (in a series) / nail / to stare / to ding" },{ pinyin: "díng", meaning: "appears in 鼎 (dǐng) variants — ancient bronze cooking vessel", rare: true },{ pinyin: "dǐng", meaning: "top / peak / to carry on head / very" },{ pinyin: "dìng", meaning: "to fix / to decide / to order / certain" }] },
+  diu: { tones: [{ pinyin: "diū", meaning: "to lose / to throw" },{ pinyin: "diú", meaning: "appears in 丢 (diū) variants — to lose / to throw", rare: true },{ pinyin: "diǔ", meaning: "archaic variant of 丢 (diū, to lose)", rare: true },{ pinyin: "diù", meaning: "archaic variant — appears in classical loss/abandon terms", rare: true }] },
+  dong: { tones: [{ pinyin: "dōng", meaning: "east / winter / owner / host" },{ pinyin: "dóng", meaning: "appears in 懂 (dǒng) variants — to understand", rare: true },{ pinyin: "dǒng", meaning: "to understand / to know / director" },{ pinyin: "dòng", meaning: "to move / to act / cave / freezing" }] },
+  dou: { tones: [{ pinyin: "dōu", meaning: "all / both / already" },{ pinyin: "dóu", meaning: "appears in 斗 (dǒu/dòu) variants — a dry measure unit", rare: true },{ pinyin: "dǒu", meaning: "steep / to tremble / to shake out" },{ pinyin: "dòu", meaning: "bean / to tease / to stay" }] },
+  du: { tones: [{ pinyin: "dū", meaning: "capital city / all / to supervise" },{ pinyin: "dú", meaning: "to read / poison / alone / only" },{ pinyin: "dǔ", meaning: "to block / stomach / sincere / to gamble" },{ pinyin: "dù", meaning: "degree / to spend time / belly / to cross" }] },
+  duan: { tones: [{ pinyin: "duān", meaning: "end / tip / upright / to carry" },{ pinyin: "duán", meaning: "appears in 断 (duàn) variants — to break off", rare: true },{ pinyin: "duǎn", meaning: "short (length) / brief" },{ pinyin: "duàn", meaning: "section / to cut off / to break / to judge" }] },
+  dui: { tones: [{ pinyin: "duī", meaning: "pile / heap / to stack" },{ pinyin: "duí", meaning: "appears in 怼 (duì) variants — to confront / push back (slang)", rare: true },{ pinyin: "duǐ", meaning: "to butt / to punch (dialectal)" },{ pinyin: "duì", meaning: "correct / right / to face / team / pair" }] },
+  dun: { tones: [{ pinyin: "dūn", meaning: "to squat / ton / to urge" },{ pinyin: "dún", meaning: "shield / to hide" },{ pinyin: "dǔn", meaning: "to doze — appears in 打盹 dǎdǔn (to take a nap)", rare: true },{ pinyin: "dùn", meaning: "pause / meal (measure word) / to flee / blunt" }] },
+  duo: { tones: [{ pinyin: "duō", meaning: "many / much / more / how (in questions)" },{ pinyin: "duó", meaning: "to seize / to take away" },{ pinyin: "duǒ", meaning: "flower / cloud (measure word) / to hide" },{ pinyin: "duò", meaning: "to chop / rudder / to fall" }] },
+
+  // --- E/F ---
+  e: { tones: [{ pinyin: "ē", meaning: "to flatter / oh! (exclamation)" },{ pinyin: "é", meaning: "goose / forehead / Russia" },{ pinyin: "ě", meaning: "nauseous / disgusted" },{ pinyin: "è", meaning: "hungry / evil / crocodile / to grip" }] },
+  en: { tones: [{ pinyin: "ēn", meaning: "grace / kindness / favor" },{ pinyin: "én", meaning: "archaic variant of 恩 (ēn) — grace / kindness / favor", rare: true },{ pinyin: "ěn", meaning: "archaic variant — appears in 恩 (ēn) classical forms", rare: true },{ pinyin: "èn", meaning: "to press (a button)" }] },
+  er: { tones: [{ pinyin: "ēr", meaning: "appears in 鸸 (ér, emu) — archaic large bird name", rare: true },{ pinyin: "ér", meaning: "child / son / and / but" },{ pinyin: "ěr", meaning: "ear / that / you (classical)" },{ pinyin: "èr", meaning: "two / second" }] },
+  fa: { tones: [{ pinyin: "fā", meaning: "to send / to emit / to hair / to discover" },{ pinyin: "fá", meaning: "to lack / to punish / to fell (trees)" },{ pinyin: "fǎ", meaning: "law / method / France" },{ pinyin: "fà", meaning: "hair (on head)" }] },
+  fan: { tones: [{ pinyin: "fān", meaning: "to turn over / to flip / to translate / sail" },{ pinyin: "fán", meaning: "ordinary / annoying / many / every time" },{ pinyin: "fǎn", meaning: "opposite / to return / to rebel" },{ pinyin: "fàn", meaning: "cooked rice / meal / to violate / flood" }] },
+  fang: { tones: [{ pinyin: "fāng", meaning: "square / direction / method" },{ pinyin: "fáng", meaning: "room / house / to guard against" },{ pinyin: "fǎng", meaning: "to visit / to imitate / spinning" },{ pinyin: "fàng", meaning: "to release / to put / to let go / to enlarge" }] },
+  fei: { tones: [{ pinyin: "fēi", meaning: "to fly / non- / Philippines" },{ pinyin: "féi", meaning: "fat / fertile / loose" },{ pinyin: "fěi", meaning: "bandit / not / luxuriant" },{ pinyin: "fèi", meaning: "lung / to废 abolish / to cost / to boil" }] },
+  fen: { tones: [{ pinyin: "fēn", meaning: "minute / cent / to divide / part / powder" },{ pinyin: "fén", meaning: "grave / tomb / to burn" },{ pinyin: "fěn", meaning: "powder / pink / noodle" },{ pinyin: "fèn", meaning: "portion / role / dung / to exert" }] },
+  feng: { tones: [{ pinyin: "fēng", meaning: "wind / crazy / sharp / abundant" },{ pinyin: "féng", meaning: "to meet / to sew" },{ pinyin: "fěng", meaning: "to mock / to recite" },{ pinyin: "fèng", meaning: "phoenix / to offer / salary" }] },
+  fo: { tones: [{ pinyin: "fō", meaning: "appears in 佛 (fó) dialectal variants — Buddha", rare: true },{ pinyin: "fó", meaning: "Buddha / Buddhism" },{ pinyin: "fǒ", meaning: "archaic variant of 佛 (fó) — Buddha", rare: true },{ pinyin: "fòu", meaning: "archaic — appears in 复 (fù) dialectal variants", rare: true }] },
+  fou: { tones: [{ pinyin: "fōu", meaning: "archaic variant of 否 — earthen jar (classical)", rare: true },{ pinyin: "fóu", meaning: "archaic variant of 否 — appears in classical negation", rare: true },{ pinyin: "fǒu", meaning: "no / to deny / earthen jar" },{ pinyin: "fòu", meaning: "archaic — appears in 复 (fù) dialectal / 覆 variants — to cover/overturn", rare: true }] },
+  fu: { tones: [{ pinyin: "fū", meaning: "husband / man / skin / to apply" },{ pinyin: "fú", meaning: "good luck / to float / to support / Buddha / bat (symbol)" },{ pinyin: "fǔ", meaning: "to stroke / to comfort / government / to rot / axe" },{ pinyin: "fù", meaning: "rich / to pay / stomach / again / wife / to go to" }] },
+
+  // --- G ---
+  gai: { tones: [{ pinyin: "gāi", meaning: "should / ought to / that / this" },{ pinyin: "gái", meaning: "appears in 改 (gǎi) dialectal — to change / correct", rare: true },{ pinyin: "gǎi", meaning: "to change / to correct / to reform" },{ pinyin: "gài", meaning: "lid / to cover / to build / probably / calcium" }] },
+  gao: { tones: [{ pinyin: "gāo", meaning: "tall / high / surname Gao" },{ pinyin: "gáo", meaning: "appears in 搞 (gǎo) variants — to do / make", rare: true },{ pinyin: "gǎo", meaning: "to do / to make / manuscript / straw" },{ pinyin: "gào", meaning: "to tell / to sue / to report" }] },
+  ge: { tones: [{ pinyin: "gē", meaning: "song / older brother / to cut" },{ pinyin: "gé", meaning: "leather / to check / shelf / to get (stuck)" },{ pinyin: "gě", meaning: "(measure word for people, informal)" },{ pinyin: "gè", meaning: "each / every / individual / (measure word)" }] },
+  gei: { tones: [{ pinyin: "gēi", meaning: "appears in 给 (gěi) dialectal variants — to give", rare: true },{ pinyin: "géi", meaning: "appears in 给 (gěi) variants — to give / for", rare: true },{ pinyin: "gěi", meaning: "to give / for / by (passive)" },{ pinyin: "gèi", meaning: "dialectal variant of 给 (gěi) — to give", rare: true }] },
+  gen: { tones: [{ pinyin: "gēn", meaning: "root / heel / with / and / to follow" },{ pinyin: "gén", meaning: "punchline / gag — appears in 哏 (gén, comedy gag)", rare: true },{ pinyin: "gěn", meaning: "tough / chewy (dialectal)" },{ pinyin: "gèn", meaning: "extending / through / from ancient times" }] },
+  geng: { tones: [{ pinyin: "gēng", meaning: "to plow / to change / a watch (time period)" },{ pinyin: "géng", meaning: "appears in 梗 (gěng) variants — meme / funny story (modern slang)", rare: true },{ pinyin: "gěng", meaning: "to choke / to block / upright" },{ pinyin: "gèng", meaning: "more / even more / further" }] },
+  gong: { tones: [{ pinyin: "gōng", meaning: "work / public / merit / bow (weapon)" },{ pinyin: "góng", meaning: "appears in 共 (gòng) variants — together / communist", rare: true },{ pinyin: "gǒng", meaning: "to cup hands / arch / to surround" },{ pinyin: "gòng", meaning: "together / to offer / to confess / communist" }] },
+  gou: { tones: [{ pinyin: "gōu", meaning: "to hook / to draw / ditch / cancel" },{ pinyin: "góu", meaning: "archaic variant of 够 (gòu) — enough / to reach", rare: true },{ pinyin: "gǒu", meaning: "dog" },{ pinyin: "gòu", meaning: "enough / to reach / to buy / to constitute" }] },
+  gua: { tones: [{ pinyin: "guā", meaning: "to scrape / melon / to blow (wind)" },{ pinyin: "guá", meaning: "appears in 挂 (guà) variants — to hang / to call", rare: true },{ pinyin: "guǎ", meaning: "few / widowed" },{ pinyin: "guà", meaning: "to hang / to wear / to miss / to call" }] },
+  guai: { tones: [{ pinyin: "guāi", meaning: "well-behaved / obedient / clever" },{ pinyin: "guái", meaning: "appears in 怪 (guài) variants — strange / to blame", rare: true },{ pinyin: "guǎi", meaning: "to turn / to kidnap / walking stick" },{ pinyin: "guài", meaning: "strange / to blame / monster" }] },
+  guan: { tones: [{ pinyin: "guān", meaning: "to close / official / to concern / guan (checkpoint)" },{ pinyin: "guán", meaning: "appears in 观 (guān/guàn) variants — to observe", rare: true },{ pinyin: "guǎn", meaning: "to manage / building / tube / to care about" },{ pinyin: "guàn", meaning: "to pour into / habit / jug / to be used to" }] },
+  guang: { tones: [{ pinyin: "guāng", meaning: "light / bright / naked / only / Guangdong" },{ pinyin: "guáng", meaning: "appears in 广 (guǎng) variants — wide / broad", rare: true },{ pinyin: "guǎng", meaning: "wide / broad / Guangzhou" },{ pinyin: "guàng", meaning: "to stroll / to roam" }] },
+  gui: { tones: [{ pinyin: "guī", meaning: "to return / rule / turtle / ghost / expensive" },{ pinyin: "guí", meaning: "appears in 贵 (guì) variants — expensive / noble", rare: true },{ pinyin: "guǐ", meaning: "ghost / spirit / sly / track / rail" },{ pinyin: "guì", meaning: "expensive / noble / to kneel / cabinet" }] },
+  gun: { tones: [{ pinyin: "gūn", meaning: "appears in 滚 (gǔn) variants — to roll / to boil", rare: true },{ pinyin: "gún", meaning: "rod / stick / bastard (insult)" },{ pinyin: "gǔn", meaning: "to roll / to boil / get lost! (slang)" },{ pinyin: "gùn", meaning: "stick / club / rod" }] },
+  guo: { tones: [{ pinyin: "guō", meaning: "pot / wok / cauldron" },{ pinyin: "guó", meaning: "country / nation / national" },{ pinyin: "guǒ", meaning: "fruit / result / resolute" },{ pinyin: "guò", meaning: "to pass / to cross / too (excessively) / fault" }] },
+
+  // --- H ---
+  hai: { tones: [{ pinyin: "hāi", meaning: "hey! (exclamation of surprise)" },{ pinyin: "hái", meaning: "still / also / yet / child" },{ pinyin: "hǎi", meaning: "sea / ocean" },{ pinyin: "hài", meaning: "to harm / to fear /害怕 afraid" }] },
+  han: { tones: [{ pinyin: "hān", meaning: "to snore / to sleep soundly" },{ pinyin: "hán", meaning: "cold / to contain / Han (ethnicity)" },{ pinyin: "hǎn", meaning: "to shout / rare / seldom" },{ pinyin: "hàn", meaning: "sweat / Chinese (written language) / Han dynasty" }] },
+  hang: { tones: [{ pinyin: "hāng", meaning: "rammer / to pound earth" },{ pinyin: "háng", meaning: "row / profession / to navigate / Hangzhou" },{ pinyin: "hǎng", meaning: "archaic variant of 航 (háng) — to navigate / profession", rare: true },{ pinyin: "hàng", meaning: "vast expanse of water — appears in 沆瀣 hàngxiè (mist/complicit)", rare: true }] },
+  hao: { tones: [{ pinyin: "hāo", meaning: "mugwort / wormwood" },{ pinyin: "háo", meaning: "hero / millimeter / luxurious / to howl" },{ pinyin: "hǎo", meaning: "good / well / friendly" },{ pinyin: "hào", meaning: "to like / number / to consume / to call" }] },
+  he: { tones: [{ pinyin: "hē", meaning: "to drink / to shout at" },{ pinyin: "hé", meaning: "river / and / together / harmony / Holland" },{ pinyin: "hě", meaning: "to scold / to shout" },{ pinyin: "hè", meaning: "crane / to congratulate / load / brown" }] },
+  hei: { tones: [{ pinyin: "hēi", meaning: "black / dark / hey!" },{ pinyin: "héi", meaning: "appears in 嘿 (hēi) variants — hey! dark (dialectal)", rare: true },{ pinyin: "hěi", meaning: "archaic variant of 黑 — dark / black", rare: true },{ pinyin: "hèi", meaning: "archaic exclamation — appears in surprise expressions", rare: true }] },
+  hen: { tones: [{ pinyin: "hēn", meaning: "appears in 狠 (hěn) variants — ruthless / harsh", rare: true },{ pinyin: "hén", meaning: "mark / trace / scar" },{ pinyin: "hěn", meaning: "very / quite" },{ pinyin: "hèn", meaning: "to hate / to regret" }] },
+  heng: { tones: [{ pinyin: "hēng", meaning: "to hum / to groan" },{ pinyin: "héng", meaning: "horizontal / across / unreasonable" },{ pinyin: "hěng", meaning: "archaic variant of 横 (héng) — horizontal / unreasonable", rare: true },{ pinyin: "hèng", meaning: "harsh / brutal / unexpected" }] },
+  hong: { tones: [{ pinyin: "hōng", meaning: "rumble / to dry / to warm by fire / to fool" },{ pinyin: "hóng", meaning: "red / great / flood / rainbow" },{ pinyin: "hǒng", meaning: "to coax / to cheat" },{ pinyin: "hòng", meaning: "uproar / commotion" }] },
+  hou: { tones: [{ pinyin: "hōu", meaning: "archaic variant of 猴 (hóu) — monkey / ape", rare: true },{ pinyin: "hóu", meaning: "monkey / throat / marquis" },{ pinyin: "hǒu", meaning: "to roar / to howl" },{ pinyin: "hòu", meaning: "behind / after / queen / thick / to wait" }] },
+  hu: { tones: [{ pinyin: "hū", meaning: "to call / to breathe out / suddenly" },{ pinyin: "hú", meaning: "lake / fox / beard / paste / nonsense" },{ pinyin: "hǔ", meaning: "tiger" },{ pinyin: "hù", meaning: "door / household / to protect / mutual" }] },
+  hua: { tones: [{ pinyin: "huā", meaning: "flower / to spend / colorful / patterned" },{ pinyin: "huá", meaning: "Chinese / to row / slippery / to scratch" },{ pinyin: "huǎ", meaning: "archaic variant of 花 (huā) — flower / to spend", rare: true },{ pinyin: "huà", meaning: "to paint / speech / to transform / Chinese language" }] },
+  huai: { tones: [{ pinyin: "huāi", meaning: "archaic variant of 怀 (huái) — to cherish / bosom", rare: true },{ pinyin: "huái", meaning: "to cherish / bosom / pregnant / locust tree" },{ pinyin: "huǎi", meaning: "archaic variant of 坏 (huài) — bad / broken", rare: true },{ pinyin: "huài", meaning: "bad / broken / to ruin" }] },
+  huan: { tones: [{ pinyin: "huān", meaning: "joyful / happy / to welcome" },{ pinyin: "huán", meaning: "to return / ring / to surround" },{ pinyin: "huǎn", meaning: "slow / to delay / to ease" },{ pinyin: "huàn", meaning: "to change / to suffer / illusion / to call" }] },
+  huang: { tones: [{ pinyin: "huāng", meaning: "wasteland / desolate / panic" },{ pinyin: "huáng", meaning: "yellow / emperor / sulfur / locust (insect)" },{ pinyin: "huǎng", meaning: "to lie / to flash / bright" },{ pinyin: "huàng", meaning: "to sway / to shake" }] },
+  hui: { tones: [{ pinyin: "huī", meaning: "ash / gray / to wave / to destroy" },{ pinyin: "huí", meaning: "to return / to reply / Muslim / time (measure word)" },{ pinyin: "huǐ", meaning: "to regret / to destroy" },{ pinyin: "huì", meaning: "meeting / can / to converge / to pay / beak" }] },
+  hun: { tones: [{ pinyin: "hūn", meaning: "to faint / marriage / dusk / confused" },{ pinyin: "hún", meaning: "soul / entire / muddy" },{ pinyin: "hǔn", meaning: "archaic variant of 混 (hùn) — to mix / to muddle through", rare: true },{ pinyin: "hùn", meaning: "to mix / to get by / chaos" }] },
+  huo: { tones: [{ pinyin: "huō", meaning: "to sacrifice / crack (in an object)" },{ pinyin: "huó", meaning: "to live / alive / work" },{ pinyin: "huǒ", meaning: "fire / flame / angry / partner" },{ pinyin: "huò", meaning: "goods / maybe / or / to capture / suddenly" }] },
+
+  // --- J ---
+  jia: { tones: [{ pinyin: "jiā", meaning: "home / family / to add / expert" },{ pinyin: "jiá", meaning: "cheek / clip — appears in 夹 jiā/jiá (to press between / folder)" },{ pinyin: "jiǎ", meaning: "fake / first (in series) / armor / nail" },{ pinyin: "jià", meaning: "price / to drive / to marry (female) / vacation" }] },
+  jian: { tones: [{ pinyin: "jiān", meaning: "sharp / between / spy / difficult" },{ pinyin: "jiǎn", meaning: "to pick up / simple / to reduce / scissors" },{ pinyin: "jiǎn", meaning: "to pick up / simple / to reduce / scissors" },{ pinyin: "jiàn", meaning: "to see / sword / to build / health / gradually" }] },
+  jiang: { tones: [{ pinyin: "jiāng", meaning: "river / will (future) / ginger / to descend" },{ pinyin: "jiáng", meaning: "archaic variant of 讲 (jiǎng) — to speak / to prize", rare: true },{ pinyin: "jiǎng", meaning: "to speak / prize / to emphasize" },{ pinyin: "jiàng", meaning: "to fall / general (military) / stubborn / sauce" }] },
+  jiao: { tones: [{ pinyin: "jiāo", meaning: "to hand over / to teach / glue / pepper / suburb" },{ pinyin: "jiáo", meaning: "to chew" },{ pinyin: "jiǎo", meaning: "foot / corner / angle / dumpling / to mix" },{ pinyin: "jiào", meaning: "to call / to order / to wake / class / religion" }] },
+  jie: { tones: [{ pinyin: "jiē", meaning: "street / to receive / to connect / to meet" },{ pinyin: "jié", meaning: "festival / section / to save / clean / knot" },{ pinyin: "jiě", meaning: "older sister / to untie / to explain / to relieve" },{ pinyin: "jiè", meaning: "border / to lend / to borrow / to warn" }] },
+  jin: { tones: [{ pinyin: "jīn", meaning: "gold / metal / today / present" },{ pinyin: "jín", meaning: "tight / urgent / close" },{ pinyin: "jǐn", meaning: "only / merely / tight / brocade" },{ pinyin: "jìn", meaning: "to enter / to advance / near / exhausted" }] },
+  jing: { tones: [{ pinyin: "jīng", meaning: "capital / essence / spirit / to pass through" },{ pinyin: "jíng", meaning: "well (water) / neck / clean / to warn" },{ pinyin: "jǐng", meaning: "scenery / police / well / to alert" },{ pinyin: "jìng", meaning: "quiet / to respect / mirror / to compete / border" }] },
+  jiu: { tones: [{ pinyin: "jiū", meaning: "to study / to seize / after all" },{ pinyin: "jiú", meaning: "archaic variant of 就 (jiù) — at once / just / to approach", rare: true },{ pinyin: "jiǔ", meaning: "nine / alcohol / wine / long time" },{ pinyin: "jiù", meaning: "old / to save / maternal uncle / at once / just" }] },
+  ju: { tones: [{ pinyin: "jū", meaning: "to live / to occupy / car (chess) / chrysanthemum" },{ pinyin: "jú", meaning: "orange / bureau / situation / game" },{ pinyin: "jǔ", meaning: "to lift / to recommend / behavior" },{ pinyin: "jù", meaning: "sentence / huge / to gather / drama / to reject" }] },
+  juan: { tones: [{ pinyin: "juān", meaning: "to donate / to contribute / thin / brook" },{ pinyin: "juán", meaning: "to roll up / volume (books)" },{ pinyin: "juǎn", meaning: "to roll / curl / to sweep up" },{ pinyin: "juàn", meaning: "tired / exam paper / to miss home" }] },
+  jue: { tones: [{ pinyin: "juē", meaning: "to pout / stick up — appears in 撅嘴 juē zuǐ (to pout)" },{ pinyin: "jué", meaning: "to feel / to decide / to dig / role / absolutely" },{ pinyin: "juě", meaning: "archaic variant of 撅 (juē) — to pout / to snap", rare: true },{ pinyin: "juè", meaning: "archaic — appears in 倔 (jué/juè) variant — stubborn", rare: true }] },
+  jun: { tones: [{ pinyin: "jūn", meaning: "army / military / soldier" },{ pinyin: "jún", meaning: "handsome / outstanding / talented" },{ pinyin: "jǔn", meaning: "archaic variant of 俊 (jùn) — handsome / talented", rare: true },{ pinyin: "jùn", meaning: "handsome / talented / county / to dredge" }] },
+
+  // --- K ---
+  kai: { tones: [{ pinyin: "kāi", meaning: "to open / to start / to drive / to boil" },{ pinyin: "kái", meaning: "appears in 凯 (kǎi) variants — triumphant / victorious", rare: true },{ pinyin: "kǎi", meaning: "triumphant / model script (calligraphy)" },{ pinyin: "kài", meaning: "appears in 慨 (kǎi) variants — indignant / generous", rare: true }] },
+  kan: { tones: [{ pinyin: "kān", meaning: "to watch over / to publish / suitable" },{ pinyin: "kán", meaning: "appears in 坎 (kǎn) variants — pit / threshold / hardship", rare: true },{ pinyin: "kǎn", meaning: "to chop / threshold / to speak frankly" },{ pinyin: "kàn", meaning: "to look / to watch / to visit / to read" }] },
+  kang: { tones: [{ pinyin: "kāng", meaning: "healthy / peaceful / bran (grain)" },{ pinyin: "káng", meaning: "to carry on shoulder" },{ pinyin: "kǎng", meaning: "generous / heated brick bed (kang)" },{ pinyin: "kàng", meaning: "to resist / to oppose / to contend" }] },
+  kao: { tones: [{ pinyin: "kāo", meaning: "buttocks (informal)" },{ pinyin: "káo", meaning: "archaic variant of 烤 (kǎo) — to roast / to grill", rare: true },{ pinyin: "kǎo", meaning: "to take an exam / to roast / to investigate" },{ pinyin: "kào", meaning: "to lean on / to rely on / near / to bake" }] },
+  ke: { tones: [{ pinyin: "kē", meaning: "branch of study / department / to levy" },{ pinyin: "ké", meaning: "shell / to cough" },{ pinyin: "kě", meaning: "can / may / but / thirsty" },{ pinyin: "kè", meaning: "lesson / class / to carve / guest / to overcome" }] },
+  ken: { tones: [{ pinyin: "kēn", meaning: "archaic variant — appears in 肯 (kěn) classical forms", rare: true },{ pinyin: "kén", meaning: "archaic variant of 啃 (kěn) — to gnaw / to chew", rare: true },{ pinyin: "kěn", meaning: "willing / to agree / to gnaw" },{ pinyin: "kèn", meaning: "archaic variant of 肯 (kěn) — willing / to agree", rare: true }] },
+  keng: { tones: [{ pinyin: "kēng", meaning: "pit / hole / to harm" },{ pinyin: "kéng", meaning: "appears in 铿 (kēng) variants — metallic clanging sound", rare: true },{ pinyin: "kěng", meaning: "appears in 坑 (kēng) variants — pit / to trap someone", rare: true },{ pinyin: "kèng", meaning: "onomatopoeia — clanging sound (appears in sound compounds)", rare: true }] },
+  kong: { tones: [{ pinyin: "kōng", meaning: "empty / sky / air / in vain" },{ pinyin: "kóng", meaning: "Confucius — appears in 孔子 (Kǒngzǐ) / 孔雀 (kǒngquè, peacock)", rare: true },{ pinyin: "kǒng", meaning: "hole / to fear / Kong (surname)" },{ pinyin: "kòng", meaning: "free time / to control / to accuse" }] },
+  kou: { tones: [{ pinyin: "kōu", meaning: "to dig out / to scrutinize / stingy" },{ pinyin: "kóu", meaning: "appears in 扣 (kòu) variants — button / to deduct", rare: true },{ pinyin: "kǒu", meaning: "mouth / opening / port / taste" },{ pinyin: "kòu", meaning: "to knock / button / to arrest / to deduct" }] },
+  ku: { tones: [{ pinyin: "kū", meaning: "to cry / to weep / withered / hollow" },{ pinyin: "kú", meaning: "appears in 酷 (kù) variants — cool / cruel", rare: true },{ pinyin: "kǔ", meaning: "bitter / suffering / hard / to suffer" },{ pinyin: "kù", meaning: "storehouse / cool / pants / ruthless" }] },
+  kua: { tones: [{ pinyin: "kuā", meaning: "to boast / to praise / to exaggerate" },{ pinyin: "kuá", meaning: "appears in 垮 (kuǎ) variants — to collapse / to fail", rare: true },{ pinyin: "kuǎ", meaning: "to collapse / to fail" },{ pinyin: "kuà", meaning: "to step over / to stride / to carry" }] },
+  kuai: { tones: [{ pinyin: "kuāi", meaning: "appears in 快 (kuài) variants — fast / soon", rare: true },{ pinyin: "kuái", meaning: "minced fish/meat — appears in 脍炙人口 (kuàizhì rénkǒu, widely popular)", rare: true },{ pinyin: "kuǎi", meaning: "to draw (dialectal)" },{ pinyin: "kuài", meaning: "fast / soon / happy / piece / yuan (money)" }] },
+  kuan: { tones: [{ pinyin: "kuān", meaning: "wide / broad / generous / relaxed" },{ pinyin: "kuán", meaning: "archaic variant of 款 (kuǎn) — section / sum of money", rare: true },{ pinyin: "kuǎn", meaning: "section / sum of money / style / sincere" },{ pinyin: "kuàn", meaning: "appears in 款 (kuǎn) variants — section / sum of money", rare: true }] },
+  kuang: { tones: [{ pinyin: "kuāng", meaning: "basket / to deceive" },{ pinyin: "kuáng", meaning: "crazy / wild / arrogant / violent" },{ pinyin: "kuǎng", meaning: "appears in 旷 (kuàng) variants — vast / open wilderness", rare: true },{ pinyin: "kuàng", meaning: "ore / mine / wilderness / moreover / frame" }] },
+  kui: { tones: [{ pinyin: "kuī", meaning: "to lose / deficit / to owe / fortunately" },{ pinyin: "kuí", meaning: "chief / sunflower / tall and strong" },{ pinyin: "kuǐ", meaning: "puppet (kuǐlěi)" },{ pinyin: "kuì", meaning: "ashamed / to give / to collapse" }] },
+  kun: { tones: [{ pinyin: "kūn", meaning: "elder brother / offspring" },{ pinyin: "kún", meaning: "to tie up / bundle" },{ pinyin: "kǔn", meaning: "to tie / bundle / bale" },{ pinyin: "kùn", meaning: "sleepy / trapped / difficult / to surround" }] },
+  kuo: { tones: [{ pinyin: "kuō", meaning: "appears in 括 (kuò) variants — to include / brackets", rare: true },{ pinyin: "kuó", meaning: "archaic variant — appears in 廓 (kuò) classical forms", rare: true },{ pinyin: "kuǒ", meaning: "archaic variant — appears in 果 (guǒ) dialectal forms", rare: true },{ pinyin: "kuò", meaning: "wide / to expand / wealthy / to include" }] },
+
+  // --- L ---
+  la: { tones: [{ pinyin: "lā", meaning: "to pull / to play (strings) / diarrhea (slang)" },{ pinyin: "lá", meaning: "to cut / to slash" },{ pinyin: "lǎ", meaning: "horn (musical instrument)" },{ pinyin: "là", meaning: "spicy / hot / candle / la (sentence particle)" }] },
+  lai: { tones: [{ pinyin: "lāi", meaning: "appears in 来 (lái) dialectal variants — to come", rare: true },{ pinyin: "lái", meaning: "to come / future / to arrive" },{ pinyin: "lǎi", meaning: "appears in 赖 (lài) variants — to depend on / scoundrel", rare: true },{ pinyin: "lài", meaning: "to depend on / to blame wrongly / lazy / scoundrel" }] },
+  lan: { tones: [{ pinyin: "lān", meaning: "appears in 拦 (lán) variants — to block / to stop", rare: true },{ pinyin: "lán", meaning: "blue / orchid / basket / to block" },{ pinyin: "lǎn", meaning: "lazy / to view / cable" },{ pinyin: "làn", meaning: "rotten / overcooked / messy / waves" }] },
+  lang: { tones: [{ pinyin: "lāng", meaning: "clanging sound — appears in 啷 (lāng) onomatopoeia", rare: true },{ pinyin: "láng", meaning: "wolf / young man / husband (classical)" },{ pinyin: "lǎng", meaning: "bright / clear / to read aloud" },{ pinyin: "làng", meaning: "wave / unrestrained / to wander" }] },
+  lao: { tones: [{ pinyin: "lāo", meaning: "to fish out / to drag" },{ pinyin: "láo", meaning: "labor / hard work / prison / to reward" },{ pinyin: "lǎo", meaning: "old / elderly / always / very" },{ pinyin: "lào", meaning: "to brand / to bake / to depend on / cheese" }] },
+  le: { tones: [{ pinyin: "lē", meaning: "to strangle / rein in — appears in 勒 (lē/lè, to force/rein)", rare: true },{ pinyin: "lé", meaning: "appears in 肋 (lèi/lé) — rib / appears in 乐 (lè) variants", rare: true },{ pinyin: "lě", meaning: "archaic variant — appears in 了 (le/liǎo) completion particle", rare: true },{ pinyin: "le", meaning: "completed action particle / happy (lè)" }] },
+  lei: { tones: [{ pinyin: "lēi", meaning: "to tighten / to force" },{ pinyin: "léi", meaning: "thunder / mine (bomb) / to bother" },{ pinyin: "lěi", meaning: "to accumulate / rampart / tired" },{ pinyin: "lèi", meaning: "tired / category / tears / to involve" }] },
+  leng: { tones: [{ pinyin: "lēng", meaning: "archaic variant of 棱 (léng) — edge / corner / ridge", rare: true },{ pinyin: "léng", meaning: "edge / corner / ridge" },{ pinyin: "lěng", meaning: "cold / cool / unexpected" },{ pinyin: "lèng", meaning: "to stare blankly / dazed / rash" }] },
+  lian: { tones: [{ pinyin: "liān", meaning: "archaic variant of 连 (lián) — to connect / even", rare: true },{ pinyin: "lián", meaning: "lotus / to connect / even / to pity" },{ pinyin: "liǎn", meaning: "face / cheek" },{ pinyin: "liàn", meaning: "to love / to practice / chain / to refine" }] },
+  liang: { tones: [{ pinyin: "liāng", meaning: "archaic variant of 量 (liáng/liàng) — to measure / quantity", rare: true },{ pinyin: "liáng", meaning: "good / bright / cool (temperature) / grain" },{ pinyin: "liǎng", meaning: "two / both / ounce (weight unit)" },{ pinyin: "liàng", meaning: "bright / to forgive / vehicle (measure word)" }] },
+  liao: { tones: [{ pinyin: "liāo", meaning: "to lift / to throw" },{ pinyin: "liáo", meaning: "to chat / to get by / to treat (medical)" },{ pinyin: "liǎo", meaning: "to finish / to understand / clear" },{ pinyin: "liào", meaning: "material / to expect / to look down on" }] },
+  lie: { tones: [{ pinyin: "liē", meaning: "appears in 咧 (liě) variants — to grin / split open", rare: true },{ pinyin: "liě", meaning: "to grin / to split — appears in 咧嘴 liě zuǐ (to grin broadly)", rare: true },{ pinyin: "liě", meaning: "to grin / split open — appears in 咧嘴 liě zuǐ (to grin widely)", rare: true },{ pinyin: "liè", meaning: "to split / to arrange in line / fierce / inferior" }] },
+  lin: { tones: [{ pinyin: "lín", meaning: "forest / neighbor / to face — appears in 邻居 línjū (neighbor)" },{ pinyin: "lǐn", meaning: "cold / to shiver / granary — appears in 凛冽 lǐnliè (bitterly cold)" },{ pinyin: "lǐn", meaning: "cold / to shiver / granary" },{ pinyin: "lìn", meaning: "stingy / to drip / dysentery" }] },
+  ling: { tones: [{ pinyin: "líng", meaning: "zero / bell / spirit / clever — appears in 零 and 灵" },{ pinyin: "lǐng", meaning: "to lead / collar / to receive — appears in 领导 lǐngdǎo (to lead)" },{ pinyin: "lǐng", meaning: "to lead / collar / to receive" },{ pinyin: "lìng", meaning: "another / order / to make / commander" }] },
+  liu: { tones: [{ pinyin: "liū", meaning: "to slip away / to slide" },{ pinyin: "liú", meaning: "to stay / to flow / six / willow / to keep" },{ pinyin: "liǔ", meaning: "willow / six (on dice)" },{ pinyin: "liù", meaning: "six / (musical note)" }] },
+  long: { tones: [{ pinyin: "lóng", meaning: "dragon — appears in 龙 (lóng) and 聋 (lóng, deaf)" },{ pinyin: "lóng", meaning: "dragon / deaf / grand / prosperous" },{ pinyin: "lǒng", meaning: "to approach / to comb / ridge (of land)" },{ pinyin: "lòng", meaning: "lane / alley" }] },
+  lou: { tones: [{ pinyin: "lōu", meaning: "to rake in — appears in 搂 (lōu/lǒu, to rake/hug)" },{ pinyin: "lóu", meaning: "building / floor / upstairs" },{ pinyin: "lǒu", meaning: "to hug / to cuddle" },{ pinyin: "lòu", meaning: "to leak / to show / humble / clumsy" }] },
+  lu: { tones: [{ pinyin: "lū", meaning: "to stroke / rub — appears in 撸 (lū, to stroke / roll up sleeves)" },{ pinyin: "lú", meaning: "hut / stove / reed / skull" },{ pinyin: "lǔ", meaning: "to capture / rash / stupid" },{ pinyin: "lù", meaning: "road / path / to record / dew / green" }] },
+  luan: { tones: [{ pinyin: "luān", meaning: "archaic variant of 乱 (luàn) — chaos / disorder", rare: true },{ pinyin: "luán", meaning: "phoenix-like bird / twin / bent" },{ pinyin: "luǎn", meaning: "egg / ovum" },{ pinyin: "luàn", meaning: "chaos / disorder / random / rebellion" }] },
+  lue: { tones: [{ pinyin: "luē", meaning: "archaic variant of 略 (lüè) — brief / strategy / to plunder", rare: true },{ pinyin: "lüé", meaning: "to plunder / brief / strategy" },{ pinyin: "lüě", meaning: "archaic variant of 略 (lüè) — approximately / strategy", rare: true },{ pinyin: "lüè", meaning: "brief / strategy / to plunder / approximately" }] },
+  lun: { tones: [{ pinyin: "lūn", meaning: "to swing / to throw" },{ pinyin: "lún", meaning: "wheel / to take turns / Confucian ethics" },{ pinyin: "lǔn", meaning: "archaic variant of 论 (lùn) — to discuss / theory", rare: true },{ pinyin: "lùn", meaning: "to discuss / theory / essay" }] },
+  luo: { tones: [{ pinyin: "luō", meaning: "to chatter / to nag" },{ pinyin: "luó", meaning: "net / to collect / mule / gong / spiral" },{ pinyin: "luǒ", meaning: "naked / bare" },{ pinyin: "luò", meaning: "to fall / to land / to settle / village" }] },
+
+  // --- M ---
+  mai: { tones: [{ pinyin: "māi", meaning: "appears in 埋 (mái/mán) variants — to bury / to hide", rare: true },{ pinyin: "mái", meaning: "to bury / to hide" },{ pinyin: "mǎi", meaning: "to buy" },{ pinyin: "mài", meaning: "to sell / wheat / to step / pulse" }] },
+  mao: { tones: [{ pinyin: "māo", meaning: "cat" },{ pinyin: "máo", meaning: "hair / fur / wool / dime / Mao" },{ pinyin: "mǎo", meaning: "4th Earthly Branch / rivet / mortise" },{ pinyin: "mào", meaning: "hat / appearance / to emit / reckless / trade" }] },
+  mei: { tones: [{ pinyin: "méi", meaning: "no / not have / plum / eyebrow — appears in 没有 méiyǒu" },{ pinyin: "měi", meaning: "beautiful / America / every — appears in 美丽 měilì (beautiful)" },{ pinyin: "měi", meaning: "beautiful / America / every" },{ pinyin: "mèi", meaning: "younger sister / to charm / to flatter" }] },
+  men: { tones: [{ pinyin: "mēn", meaning: "stuffy / bored / to seal" },{ pinyin: "mén", meaning: "door / gate / family / school of thought" },{ pinyin: "měn", meaning: "archaic variant — appears in 们 (men) classical forms", rare: true },{ pinyin: "mèn", meaning: "melancholy / to stew / bored" }] },
+  meng: { tones: [{ pinyin: "mēng", meaning: "to deceive / to cover / ignorant" },{ pinyin: "méng", meaning: "sprout / Mongolia / alliance / to sprout" },{ pinyin: "měng", meaning: "fierce / suddenly / Mengzi" },{ pinyin: "mèng", meaning: "dream / Mencius / eldest" }] },
+  mi: { tones: [{ pinyin: "mī", meaning: "to squint / (cat sound)" },{ pinyin: "mí", meaning: "fan / lost / riddle / thick (fog)" },{ pinyin: "mǐ", meaning: "rice / meter / Mickey (sound)" },{ pinyin: "mì", meaning: "secret / honey / dense / to look for" }] },
+  mian: { tones: [{ pinyin: "miān", meaning: "appears in 眠 (mián) variants — sleep / hibernate", rare: true },{ pinyin: "mián", meaning: "cotton / continuous / to sleep" },{ pinyin: "miǎn", meaning: "to avoid / to exempt / crown / to urge" },{ pinyin: "miàn", meaning: "face / surface / noodle / side / flour" }] },
+  miao: { tones: [{ pinyin: "miāo", meaning: "meow (cat sound)" },{ pinyin: "miáo", meaning: "sprout / seedling / to trace / to aim" },{ pinyin: "miǎo", meaning: "second (time) / tiny / vast" },{ pinyin: "miào", meaning: "wonderful / temple / clever" }] },
+  mie: { tones: [{ pinyin: "miē", meaning: "bleat (sheep sound)" },{ pinyin: "mié", meaning: "to extinguish / to perish / to destroy" },{ pinyin: "miě", meaning: "archaic variant of 灭 (miè) — to extinguish / to perish", rare: true },{ pinyin: "miè", meaning: "to extinguish / to destroy / to look down on" }] },
+  min: { tones: [{ pinyin: "mīn", meaning: "appears in 民 (mín) variants — people / folk", rare: true },{ pinyin: "mín", meaning: "people / civilian / folk" },{ pinyin: "mǐn", meaning: "quick / clever / Fujian (Min)" },{ pinyin: "mìn", meaning: "appears in 闽 (Mǐn, Fujian province) variants", rare: true }] },
+  ming: { tones: [{ pinyin: "mīng", meaning: "appears in 名 (míng) variants — name / famous", rare: true },{ pinyin: "míng", meaning: "bright / clear / name / famous / Ming dynasty" },{ pinyin: "mǐng", meaning: "archaic variant — appears in 酩酊 mǐngdǐng (dead drunk)", rare: true },{ pinyin: "mìng", meaning: "life / fate / order / to name" }] },
+  mo: { tones: [{ pinyin: "mō", meaning: "to touch / to feel / to grope" },{ pinyin: "mó", meaning: "to grind / to rub / magic / demon" },{ pinyin: "mǒ", meaning: "to wipe / to erase / to plaster" },{ pinyin: "mò", meaning: "ink / end / desert / silent / to sink" }] },
+  mou: { tones: [{ pinyin: "mōu", meaning: "moo (cow sound)" },{ pinyin: "móu", meaning: "to plan / to seek / pupil (of eye)" },{ pinyin: "mǒu", meaning: "some / a certain / so-and-so" },{ pinyin: "mòu", meaning: "archaic variant of 某 (mǒu) — a certain / so-and-so", rare: true }] },
+  mu: { tones: [{ pinyin: "mū", meaning: "archaic variant of 母 (mǔ) — mother / female", rare: true },{ pinyin: "mú", meaning: "mold / look / template" },{ pinyin: "mǔ", meaning: "mother / female (animal) / mu (area unit)" },{ pinyin: "mù", meaning: "tree / wood / eye / to bathe / solemn / pasture" }] },
+
+  // --- N ---
+  na: { tones: [{ pinyin: "nā", meaning: "that (dialectal)" },{ pinyin: "ná", meaning: "to take / to hold / to get" },{ pinyin: "nǎ", meaning: "which / where" },{ pinyin: "nà", meaning: "that / then / to accept / na (sentence particle)" }] },
+  nai: { tones: [{ pinyin: "nāi", meaning: "appears in 奶 (nǎi) variants — milk / breast / grandma", rare: true },{ pinyin: "nái", meaning: "appears in 乃 (nǎi) variants — then / thereupon (classical)", rare: true },{ pinyin: "nǎi", meaning: "you (classical) / breast / milk / grandmother" },{ pinyin: "nài", meaning: "to endure / to tolerate / able to withstand" }] },
+  nan: { tones: [{ pinyin: "nān", meaning: "appears in 男 (nán) variants — male / man", rare: true },{ pinyin: "nán", meaning: "south / male / man / difficult" },{ pinyin: "nǎn", meaning: "to blush with shame — appears in 赧颜 nǎnyán (blushing face)", rare: true },{ pinyin: "nàn", meaning: "difficulty / disaster / to blame" }] },
+  nao: { tones: [{ pinyin: "nāo", meaning: "appears in 挠 (náo) variants — to scratch / to yield", rare: true },{ pinyin: "náo", meaning: "to scratch / to yield / cymbals" },{ pinyin: "nǎo", meaning: "brain / mind / to irritate" },{ pinyin: "nào", meaning: "noisy / to make noise / to have / to go in for" }] },
+  ne: { tones: [{ pinyin: "nē", meaning: "appears in 呢 (ne) variants — sentence softener particle", rare: true },{ pinyin: "né", meaning: "appears in 哪 (nǎ/né) variants — which / where", rare: true },{ pinyin: "něn", meaning: "appears in 嫩 (nèn) variants — tender / young / inexperienced", rare: true },{ pinyin: "ne", meaning: "question particle / (sentence softener)" }] },
+  nei: { tones: [{ pinyin: "nēi", meaning: "appears in 内 (nèi) variants — inside / inner", rare: true },{ pinyin: "néi", meaning: "which — appears in 哪 (nǎ/něi) northern dialect", rare: true },{ pinyin: "něi", meaning: "which (dialectal)" },{ pinyin: "nèi", meaning: "inside / inner / within / wife's family" }] },
+  neng: { tones: [{ pinyin: "nēng", meaning: "appears in 能 (néng) variants — ability / energy", rare: true },{ pinyin: "néng", meaning: "can / ability / energy / capable" },{ pinyin: "něng", meaning: "archaic variant of 能 — capable / able", rare: true },{ pinyin: "nèng", meaning: "archaic variant — appears in ability/force compounds", rare: true }] },
+  ni: { tones: [{ pinyin: "nī", meaning: "appears in 泥 (ní) variants — mud / clay / to plaster", rare: true },{ pinyin: "ní", meaning: "mud / Buddhist nun" },{ pinyin: "nǐ", meaning: "you (singular)" },{ pinyin: "nì", meaning: "to drown / inverse / to flatter / to rebel" }] },
+  nian: { tones: [{ pinyin: "niān", meaning: "to pick up with fingers / to fiddle" },{ pinyin: "nián", meaning: "year / sticky / to glue" },{ pinyin: "niǎn", meaning: "to drive away / to grind / paper-twist" },{ pinyin: "niàn", meaning: "to read aloud / to study / to miss / twenty" }] },
+  niang: { tones: [{ pinyin: "niāng", meaning: "appears in 娘 (niáng) variants — mother / young woman", rare: true },{ pinyin: "niáng", meaning: "mother / young woman / wife" },{ pinyin: "niǎng", meaning: "archaic variant of 酿 (niàng) — to brew / to ferment", rare: true },{ pinyin: "niàng", meaning: "to ferment / to brew / to lead to" }] },
+  niao: { tones: [{ pinyin: "niāo", meaning: "appears in 鸟 (niǎo) variants — bird (dialectal)", rare: true },{ pinyin: "niáo", meaning: "bird — dialectal variant of 鸟 (niǎo)" },{ pinyin: "niǎo", meaning: "bird" },{ pinyin: "niào", meaning: "urine / to urinate" }] },
+  nie: { tones: [{ pinyin: "niē", meaning: "to pinch / to knead / to make up" },{ pinyin: "nié", meaning: "archaic variant of 捏 (niē) — to pinch / to knead / to fabricate", rare: true },{ pinyin: "niě", meaning: "archaic variant — appears in 捏造 (niēzào, to fabricate) forms", rare: true },{ pinyin: "niè", meaning: "sin / evil / to whisper / tweezers" }] },
+  nin: { tones: [{ pinyin: "nīn", meaning: "archaic variant of 您 (nín) — you (polite)", rare: true },{ pinyin: "nín", meaning: "you (polite/formal)" },{ pinyin: "nǐn", meaning: "archaic variant of 您 (nín) — you (respectful form)", rare: true },{ pinyin: "nìn", meaning: "archaic variant of 您 (nín) — you (polite/formal)", rare: true }] },
+  ning: { tones: [{ pinyin: "níng", meaning: "peaceful / lemon — appears in 宁 (peaceful) and 柠檬 níngméng (lemon)" },{ pinyin: "nǐng", meaning: "to twist / wring / stubborn — appears in 拧 (nǐng, to twist/wring)" },{ pinyin: "nǐng", meaning: "to twist / to wring / stubborn" },{ pinyin: "nìng", meaning: "would rather / stubborn / flatter" }] },
+  niu: { tones: [{ pinyin: "niū", meaning: "girl (dialectal)" },{ pinyin: "niú", meaning: "cow / ox / bull / awesome (slang)" },{ pinyin: "niǔ", meaning: "button / knob / to turn / to twist" },{ pinyin: "niù", meaning: "stubborn / to turn" }] },
+  nong: { tones: [{ pinyin: "nōng", meaning: "appears in 农 (nóng) variants — farmer / agriculture", rare: true },{ pinyin: "nóng", meaning: "farmer / agriculture / thick / dense / strong (flavor)" },{ pinyin: "nǒng", meaning: "archaic variant of 弄 (nòng) — to play with / alley", rare: true },{ pinyin: "nòng", meaning: "to play with / to do / alley / lane" }] },
+  nu: { tones: [{ pinyin: "nū", meaning: "appears in 奴 (nú) variants — slave / servant", rare: true },{ pinyin: "nú", meaning: "slave / servant" },{ pinyin: "nǔ", meaning: "to exert / crossbow" },{ pinyin: "nù", meaning: "angry / rage / to strive" }] },
+  nuan: { tones: [{ pinyin: "nuān", meaning: "appears in 暖 (nuǎn) variants — warm / genial", rare: true },{ pinyin: "nuán", meaning: "archaic variant of 暖 — warmth / gentle warmth", rare: true },{ pinyin: "nuǎn", meaning: "warm / genial" },{ pinyin: "nuàn", meaning: "archaic variant of 暖 — warm / to warm up", rare: true }] },
+  nuo: { tones: [{ pinyin: "nuō", meaning: "to shirk / to shift" },{ pinyin: "nuó", meaning: "to move / to shift" },{ pinyin: "nuǒ", meaning: "archaic variant of 挪 (nuó) — to move / to shift", rare: true },{ pinyin: "nuò", meaning: "promise / cowardly / glutinous" }] },
+
+  // --- P ---
+  pa: { tones: [{ pinyin: "pā", meaning: "to lie face down / bang! / to cling to" },{ pinyin: "pá", meaning: "to crawl / to climb / to rake" },{ pinyin: "pǎ", meaning: "archaic variant of 怕 (pà) — to fear / to be afraid", rare: true },{ pinyin: "pà", meaning: "to fear / to be afraid / handkerchief" }] },
+  pai: { tones: [{ pinyin: "pāi", meaning: "to clap / to pat / to shoot (film) / racket" },{ pinyin: "pái", meaning: "to row / row / platoon / to arrange / brand" },{ pinyin: "pǎi", meaning: "appears in 派 (pài) variants — faction / to send / style", rare: true },{ pinyin: "pài", meaning: "faction / to send / pie" }] },
+  pan: { tones: [{ pinyin: "pān", meaning: "to climb / to involve" },{ pinyin: "pán", meaning: "plate / disk / to check / to move" },{ pinyin: "pǎn", meaning: "appears in 叛 (pàn) variants — to betray / rebellion", rare: true },{ pinyin: "pàn", meaning: "to judge / to hope for / to betray / bank (of river)" }] },
+  pang: { tones: [{ pinyin: "pāng", meaning: "bang / splash — appears in 乒乓 pīngpāng (ping pong)" },{ pinyin: "páng", meaning: "beside / other / vast / fat" },{ pinyin: "pǎng", meaning: "archaic variant of 胖 (pàng) — fat / plump / chubby", rare: true },{ pinyin: "pàng", meaning: "fat / plump / chubby" }] },
+  pao: { tones: [{ pinyin: "pāo", meaning: "to throw / to abandon / spongy" },{ pinyin: "páo", meaning: "to dig / to peel off / robe" },{ pinyin: "pǎo", meaning: "to run / to flee / to walk" },{ pinyin: "pào", meaning: "bubble / to soak / to brew / cannon / to pick up (slang)" }] },
+  pei: { tones: [{ pinyin: "pēi", meaning: "embryo / bah! (exclamation)" },{ pinyin: "péi", meaning: "to accompany / to compensate / to cultivate" },{ pinyin: "pěi", meaning: "appears in 配 (pèi) variants — to match / to mix", rare: true },{ pinyin: "pèi", meaning: "to match / to admire / to wear / to mix" }] },
+  pen: { tones: [{ pinyin: "pēn", meaning: "to spray / to spurt" },{ pinyin: "pén", meaning: "basin / pot / tub" },{ pinyin: "pěn", meaning: "appears in 喷 (pēn) variants — to spray / to spurt", rare: true },{ pinyin: "pèn", meaning: "fragrant / peak season" }] },
+  peng: { tones: [{ pinyin: "pēng", meaning: "bang / to boil / to cook" },{ pinyin: "péng", meaning: "friend / to expand / shed / Peng (name)" },{ pinyin: "pěng", meaning: "to hold in both hands / to praise" },{ pinyin: "pèng", meaning: "to touch / to meet / to bump into / to try luck" }] },
+  pi: { tones: [{ pinyin: "pī", meaning: "to drape / to split / batch / to criticize" },{ pinyin: "pí", meaning: "skin / leather / tired / naughty" },{ pinyin: "pǐ", meaning: "roll / horse (measure) / to match" },{ pinyin: "pì", meaning: "to open up / to fart / secluded" }] },
+  pian: { tones: [{ pinyin: "piān", meaning: "partial / to lean / essay / to fly" },{ pinyin: "pián", meaning: "cheap / (classical particle)" },{ pinyin: "piǎn", meaning: "archaic variant of 片 (piàn) — piece / slice / film", rare: true },{ pinyin: "piàn", meaning: "piece / slice / film / to cheat / flat (measure word)" }] },
+  piao: { tones: [{ pinyin: "piāo", meaning: "to float / to drift / to bleach" },{ pinyin: "piáo", meaning: "ladle / to visit prostitutes (slang)" },{ pinyin: "piǎo", meaning: "to bleach / to rinse" },{ pinyin: "piào", meaning: "ticket / bill / to look handsome" }] },
+  pin: { tones: [{ pinyin: "pīn", meaning: "to spell / to piece together / to risk" },{ pinyin: "pín", meaning: "poor / frequent / frequency" },{ pinyin: "pǐn", meaning: "product / article / taste / character" },{ pinyin: "pìn", meaning: "to hire / to betroth" }] },
+  ping: { tones: [{ pinyin: "pīng", meaning: "ping pong" },{ pinyin: "píng", meaning: "flat / peaceful / screen / apple / comment / bottle" },{ pinyin: "pǐng", meaning: "appears in 品 (pǐn) variants — product / character / taste", rare: true },{ pinyin: "pìng", meaning: "appears in 评 (píng) variants — to comment / review", rare: true }] },
+  po: { tones: [{ pinyin: "pō", meaning: "slope / hillside / quite / rather" },{ pinyin: "pó", meaning: "grandmother / old woman / wife's mother" },{ pinyin: "pǒ", meaning: "appears in 破 (pò) variants — to break / to defeat", rare: true },{ pinyin: "pò", meaning: "to break / to destroy / to defeat / urgent / soul" }] },
+  pou: { tones: [{ pinyin: "pōu", meaning: "to cut open / to analyze" },{ pinyin: "póu", meaning: "to collect / gather — appears in 裒 (póu, to collect) classical term", rare: true },{ pinyin: "pǒu", meaning: "archaic variant of 剖 — to cut open / to analyze", rare: true },{ pinyin: "pòu", meaning: "archaic variant — appears in dissection/analysis compounds", rare: true }] },
+  pu: { tones: [{ pinyin: "pū", meaning: "to throw oneself / to flutter / to pounce / to pat" },{ pinyin: "pú", meaning: "servant / grape / Buddhism / common/plain" },{ pinyin: "pǔ", meaning: "general / plain / riverside / sheet music" },{ pinyin: "pù", meaning: "shop / to spread / waterfall / bunk" }] },
+
+  // --- Q ---
+  qia: { tones: [{ pinyin: "qiā", meaning: "to pinch / to grip" },{ pinyin: "qiá", meaning: "appears in 卡 (qiǎ/kǎ) variants — checkpoint / to get stuck", rare: true },{ pinyin: "qiǎ", meaning: "checkpoint / to get stuck / clip" },{ pinyin: "qià", meaning: "exactly / just right / to consult" }] },
+  qian: { tones: [{ pinyin: "qiān", meaning: "thousand / to sign / to lead / modest" },{ pinyin: "qián", meaning: "front / before / money / shallow / potential" },{ pinyin: "qiǎn", meaning: "shallow / to send / light (color)" },{ pinyin: "qiàn", meaning: "owe / apology / to lack / moat / to yawn" }] },
+  qiang: { tones: [{ pinyin: "qiāng", meaning: "gun / spear / cavity / to bump" },{ pinyin: "qiáng", meaning: "strong / wall / better" },{ pinyin: "qiǎng", meaning: "to rob / to rush / to scrape" },{ pinyin: "qiàng", meaning: "to choke (on) / pungent" }] },
+  qiao: { tones: [{ pinyin: "qiāo", meaning: "to knock / to strike / to extort" },{ pinyin: "qiáo", meaning: "bridge / tall / to look / overseas Chinese" },{ pinyin: "qiǎo", meaning: "skillful / clever / coincidentally / quiet" },{ pinyin: "qiào", meaning: "steep / shell / to stick up / coquettish" }] },
+  qie: { tones: [{ pinyin: "qiē", meaning: "to cut / to slice / eggplant" },{ pinyin: "qié", meaning: "eggplant" },{ pinyin: "qiě", meaning: "moreover / for now / just" },{ pinyin: "qiè", meaning: "to steal / secretly / concubine / afraid" }] },
+  qin: { tones: [{ pinyin: "qīn", meaning: "relative / dear / to kiss / parent" },{ pinyin: "qín", meaning: "diligent / Qin dynasty / piano/zither" },{ pinyin: "qǐn", meaning: "to sleep / bedroom / to stop" },{ pinyin: "qìn", meaning: "to seep / to permeate / cool" }] },
+  qing: { tones: [{ pinyin: "qīng", meaning: "light (weight) / young / blue-green / clear" },{ pinyin: "qíng", meaning: "feeling / emotion / love / situation / fine (weather)" },{ pinyin: "qǐng", meaning: "please / to invite / to treat" },{ pinyin: "qìng", meaning: "to celebrate / congratulate / (surname)" }] },
+  qiong: { tones: [{ pinyin: "qiōng", meaning: "poor / Hainan — appears in 穷 (qióng) tone variants", rare: true },{ pinyin: "qióng", meaning: "poor / exhausted / thoroughly" },{ pinyin: "qiǒng", meaning: "archaic variant — appears in 穷 (qióng) classical forms", rare: true },{ pinyin: "qiòng", meaning: "archaic variant of 穷 (qióng) — poor / exhausted", rare: true }] },
+  qiu: { tones: [{ pinyin: "qiū", meaning: "autumn / fall / year / hill" },{ pinyin: "qiú", meaning: "ball / to seek / prisoner / sphere" },{ pinyin: "qiǔ", meaning: "archaic variant of 秋 (qiū) — autumn / year", rare: true },{ pinyin: "qiù", meaning: "archaic variant — appears in 臭 (chòu/xiù) smell compounds", rare: true }] },
+  qu: { tones: [{ pinyin: "qū", meaning: "to go to / to drive away / district / bent" },{ pinyin: "qú", meaning: "canal / ditch / (surname)" },{ pinyin: "qǔ", meaning: "to take / to get / to choose / song / tune" },{ pinyin: "qù", meaning: "to go / past / interest / flavor / to remove" }] },
+  quan: { tones: [{ pinyin: "quān", meaning: "circle / ring / to encircle / fold (animals)" },{ pinyin: "quán", meaning: "complete / all / fist / authority / spring (water)" },{ pinyin: "quǎn", meaning: "dog (classical)" },{ pinyin: "quàn", meaning: "to advise / ticket / coupon" }] },
+  que: { tones: [{ pinyin: "quē", meaning: "to lack / deficient / absent" },{ pinyin: "qué", meaning: "lame / to limp" },{ pinyin: "quě", meaning: "archaic variant of 却 (què) — but / however / to retreat", rare: true },{ pinyin: "què", meaning: "but / however / sparrow / to confirm / to retreat" }] },
+  qun: { tones: [{ pinyin: "qūn", meaning: "to hesitate / step back — appears in 逡巡 qūnxún (to hesitate)", rare: true },{ pinyin: "qún", meaning: "group / crowd / skirt / herd" },{ pinyin: "qǔn", meaning: "archaic variant of 群 (qún) — group / crowd / herd", rare: true },{ pinyin: "qùn", meaning: "archaic variant — appears in group/crowd classical terms", rare: true }] },
+
+  // --- R ---
+  ran: { tones: [{ pinyin: "rān", meaning: "to dye / catch — appears in 染 (rǎn) and 燃 (rán, to burn) variants" },{ pinyin: "rán", meaning: "correct / so / but / to burn" },{ pinyin: "rǎn", meaning: "to dye / gradually" },{ pinyin: "ràn", meaning: "archaic variant of 染 (rǎn) — to dye / to catch illness", rare: true }] },
+  rang: { tones: [{ pinyin: "rāng", meaning: "to shout / to make noise" },{ pinyin: "ráng", meaning: "pulp (of fruit) / to yield land" },{ pinyin: "rǎng", meaning: "soil / earth / to stuff" },{ pinyin: "ràng", meaning: "to let / to yield / to give way / to make" }] },
+  rao: { tones: [{ pinyin: "rāo", meaning: "appears in 扰 (rǎo) variants — to disturb / to bother", rare: true },{ pinyin: "ráo", meaning: "plentiful / to spare / to add for free" },{ pinyin: "rǎo", meaning: "to disturb / to bother" },{ pinyin: "rào", meaning: "to wind around / to go around / to circle" }] },
+  re: { tones: [{ pinyin: "rē", meaning: "appears in 惹 (rě) variants — to provoke / to attract", rare: true },{ pinyin: "ré", meaning: "archaic variant of 热 (rè) — hot / heat / fever / enthusiastic", rare: true },{ pinyin: "rě", meaning: "to provoke / to cause / to attract" },{ pinyin: "rè", meaning: "hot / heat / fever / popular / enthusiastic" }] },
+  ren: { tones: [{ pinyin: "rēn", meaning: "appears in 人 (rén) classical variants — person / human", rare: true },{ pinyin: "rén", meaning: "person / people / human being" },{ pinyin: "rěn", meaning: "to endure / to bear / cruel" },{ pinyin: "rèn", meaning: "to recognize / to admit / blade / to appoint" }] },
+  reng: { tones: [{ pinyin: "rēng", meaning: "to throw / to toss / to cast away" },{ pinyin: "réng", meaning: "still / yet / as before" },{ pinyin: "rěng", meaning: "archaic variant of 仍 (réng) — still / as before", rare: true },{ pinyin: "rèng", meaning: "archaic variant — appears in classical continuation terms", rare: true }] },
+  ri: { tones: [{ pinyin: "rī", meaning: "archaic variant of 日 (rì) — sun / day", rare: true },{ pinyin: "rí", meaning: "archaic variant of 日 (rì) — sun / day / Japan", rare: true },{ pinyin: "rǐ", meaning: "archaic variant of 日 (rì) — sun / daily", rare: true },{ pinyin: "rì", meaning: "sun / day / Japan / daily" }] },
+  rong: { tones: [{ pinyin: "róng", meaning: "to dissolve / to hold / face / glory / velvet" },{ pinyin: "rǒng", meaning: "superfluous / redundant — appears in 冗余 rǒngyú (redundant)" },{ pinyin: "rǒng", meaning: "superfluous / redundant" },{ pinyin: "ròng", meaning: "archaic variant — appears in 熔 (róng) classical forms — to melt", rare: true }] },
+  rou: { tones: [{ pinyin: "róu", meaning: "soft / gentle / to knead — appears in 柔软 róuruǎn (soft)" },{ pinyin: "rǒu", meaning: "archaic variant of 肉 (ròu) — meat / flesh", rare: true },{ pinyin: "rǒu", meaning: "archaic variant of 肉 (ròu) — meat / flesh", rare: true },{ pinyin: "ròu", meaning: "meat / flesh / fruit pulp" }] },
+  ru: { tones: [{ pinyin: "rū", meaning: "archaic variant of 入 (rù) / 孺 (rú) — to enter / infant", rare: true },{ pinyin: "rú", meaning: "like / as if / to go to / Confucian" },{ pinyin: "rǔ", meaning: "milk / breast / to suckle / to insult" },{ pinyin: "rù", meaning: "to enter / to join / income" }] },
+  ruan: { tones: [{ pinyin: "ruān", meaning: "archaic variant of 软 (ruǎn) — soft / weak", rare: true },{ pinyin: "ruán", meaning: "archaic variant — appears in 软 (ruǎn) classical forms", rare: true },{ pinyin: "ruǎn", meaning: "soft / weak / floppy" },{ pinyin: "ruàn", meaning: "archaic variant of 软 — soft / pliable", rare: true }] },
+  rui: { tones: [{ pinyin: "ruī", meaning: "appears in 蕊 (ruǐ) variants — stamen / pistil of flower", rare: true },{ pinyin: "ruí", meaning: "drooping flowers — appears in 蕤 (ruí) archaic botanical term", rare: true },{ pinyin: "ruǐ", meaning: "stamen / pistil" },{ pinyin: "ruì", meaning: "sharp / keen / auspicious / Switzerland" }] },
+  run: { tones: [{ pinyin: "rūn", meaning: "appears in 润 (rùn) variants — moist / smooth / profit", rare: true },{ pinyin: "rún", meaning: "archaic variant of 润 — to moisten / to enrich", rare: true },{ pinyin: "rǔn", meaning: "archaic variant of 润 — moisture / benefit", rare: true },{ pinyin: "rùn", meaning: "moist / smooth / to moisten / leap (month)" }] },
+  ruo: { tones: [{ pinyin: "ruō", meaning: "archaic variant of 若 (ruò) — if / like / weak", rare: true },{ pinyin: "ruó", meaning: "archaic variant — appears in 若 classical forms", rare: true },{ pinyin: "ruǒ", meaning: "archaic variant of 若 — if / as if", rare: true },{ pinyin: "ruò", meaning: "weak / if / like / Ruò (river name)" }] },
+
+  // --- S ---
+  sa: { tones: [{ pinyin: "sā", meaning: "to release / to let go / three (dialectal)" },{ pinyin: "sá", meaning: "what — dialectal variant of 啥 (shá, what)" },{ pinyin: "sǎ", meaning: "to sprinkle / to spill / free and easy" },{ pinyin: "sà", meaning: "sound of wind / valiant — appears in 飒爽 sàshuǎng (valiant and heroic)", rare: true }] },
+  sai: { tones: [{ pinyin: "sāi", meaning: "to stuff / to fill / stopper / cheek" },{ pinyin: "sái", meaning: "archaic variant of 赛 (sài) — competition / to surpass", rare: true },{ pinyin: "sǎi", meaning: "gill — appears in 鳃 (sāi, fish gill) / cheek" },{ pinyin: "sài", meaning: "competition / to compete / to surpass" }] },
+  san: { tones: [{ pinyin: "sān", meaning: "three" },{ pinyin: "sán", meaning: "archaic variant of 三 (sān) — three", rare: true },{ pinyin: "sǎn", meaning: "umbrella / loose / powder / to scatter" },{ pinyin: "sàn", meaning: "to scatter / to distribute / to break up" }] },
+  sang: { tones: [{ pinyin: "sāng", meaning: "mulberry (tree)" },{ pinyin: "sáng", meaning: "appears in 桑 (sāng) variants — mulberry tree", rare: true },{ pinyin: "sǎng", meaning: "throat / voice" },{ pinyin: "sàng", meaning: "to lose / to be dispirited / funeral" }] },
+  sao: { tones: [{ pinyin: "sāo", meaning: "to scratch / to disturb / smell of urine / sister-in-law" },{ pinyin: "sáo", meaning: "archaic variant of 扫 (sǎo) — to sweep / sister-in-law", rare: true },{ pinyin: "sǎo", meaning: "to sweep / older brother's wife" },{ pinyin: "sào", meaning: "broom" }] },
+  se: { tones: [{ pinyin: "sē", meaning: "appears in 色 (sè) dialectal variants — color / appearance", rare: true },{ pinyin: "sé", meaning: "appears in 色 (sè) variants — color / appearance / sex", rare: true },{ pinyin: "sě", meaning: "appears in 涩 (sè) variants — astringent / rough / unsmooth", rare: true },{ pinyin: "sè", meaning: "color / appearance / sex / expression / scenery" }] },
+  sen: { tones: [{ pinyin: "sēn", meaning: "forest / dark — appears in 森林 sēnlín (forest)" },{ pinyin: "sén", meaning: "archaic variant of 森 — forest / dense", rare: true },{ pinyin: "sěn", meaning: "archaic variant — appears in 森 classical forms", rare: true },{ pinyin: "sèn", meaning: "archaic variant of 森 — dense / numerous", rare: true }] },
+  sha: { tones: [{ pinyin: "shā", meaning: "to kill / sand / to brake / gauze" },{ pinyin: "shá", meaning: "what (dialectal)" },{ pinyin: "shǎ", meaning: "stupid / foolish" },{ pinyin: "shà", meaning: "tall building / evil / very / a moment" }] },
+  shai: { tones: [{ pinyin: "shāi", meaning: "to sieve / to filter / to pour" },{ pinyin: "shái", meaning: "color — dialectal variant, appears in 什么颜色 (color) compounds", rare: true },{ pinyin: "shǎi", meaning: "color (dialectal)" },{ pinyin: "shài", meaning: "to sun / to expose / to show off" }] },
+  shan: { tones: [{ pinyin: "shān", meaning: "mountain / hill / Shan (surname)" },{ pinyin: "shán", meaning: "appears in 删 (shān) variants — to delete / to cut", rare: true },{ pinyin: "shǎn", meaning: "to flash / to dodge / to sprain / Shaanxi" },{ pinyin: "shàn", meaning: "good / to be good at / to repair / fan" }] },
+  shang: { tones: [{ pinyin: "shāng", meaning: "to injure / commerce / trade / grief" },{ pinyin: "shàng", meaning: "up / above / to go up / to attend" },{ pinyin: "shǎng", meaning: "to reward / to appreciate / midday" },{ pinyin: "shàng", meaning: "up / above / to go up / to attend" }] },
+  shao: { tones: [{ pinyin: "shāo", meaning: "tip / end / to burn / a little" },{ pinyin: "sháo", meaning: "spoon / ladle / Shao (surname)" },{ pinyin: "shǎo", meaning: "few / little / young / lack" },{ pinyin: "shào", meaning: "young / Shao (place)" }] },
+  she: { tones: [{ pinyin: "shē", meaning: "luxurious / excessive" },{ pinyin: "shé", meaning: "snake / to fold / tongue" },{ pinyin: "shě", meaning: "to give up / to abandon" },{ pinyin: "shè", meaning: "to set up / club / society / to shoot / to involve" }] },
+  shei: { tones: [{ pinyin: "shéi", meaning: "who / whoever" },{ pinyin: "shéi", meaning: "who / whoever" },{ pinyin: "shěi", meaning: "archaic variant of 谁 — who / whoever", rare: true },{ pinyin: "shèi", meaning: "archaic variant of 谁 (shéi/shuí) — who", rare: true }] },
+  shen: { tones: [{ pinyin: "shēn", meaning: "deep / body / to extend / Shen (surname)" },{ pinyin: "shén", meaning: "spirit / god / divine / expression" },{ pinyin: "shěn", meaning: "careful / to examine / Shen/aunt" },{ pinyin: "shèn", meaning: "cautious / very / kidney" }] },
+  sheng: { tones: [{ pinyin: "shēng", meaning: "to give birth / student / raw / life / sound" },{ pinyin: "shéng", meaning: "rope / string / to restrain" },{ pinyin: "shěng", meaning: "province / to save / to omit" },{ pinyin: "shèng", meaning: "to win / holy / prosperous / remaining" }] },
+  shou: { tones: [{ pinyin: "shōu", meaning: "to receive / to collect / to harvest" },{ pinyin: "shóu", meaning: "cooked — dialectal variant of 熟 (shú, cooked/ripe/familiar)", rare: true },{ pinyin: "shǒu", meaning: "hand / first / head / to guard" },{ pinyin: "shòu", meaning: "thin / lean / to sell / to receive / to suffer" }] },
+  shu: { tones: [{ pinyin: "shū", meaning: "book / to write / uncle / to lose / comfortable" },{ pinyin: "shú", meaning: "cooked / ripe / familiar / to redeem" },{ pinyin: "shǔ", meaning: "rat / Sichuan / to belong to / summer heat" },{ pinyin: "shù", meaning: "tree / method / to count / to bind / beam" }] },
+  shua: { tones: [{ pinyin: "shuā", meaning: "to brush / to swipe / to eliminate" },{ pinyin: "shuá", meaning: "to play (dialectal)" },{ pinyin: "shuǎ", meaning: "to play with / to juggle / to trick" },{ pinyin: "shuà", meaning: "archaic variant of 刷 (shuā) — to brush / to swipe", rare: true }] },
+  shuai: { tones: [{ pinyin: "shuāi", meaning: "to fall / to throw down / to decline" },{ pinyin: "shuái", meaning: "handsome / to lead troops" },{ pinyin: "shuǎi", meaning: "to swing / to wave / to throw" },{ pinyin: "shuài", meaning: "handsome / commander / to lead" }] },
+  shuan: { tones: [{ pinyin: "shuān", meaning: "to tie / to fasten / bolt" },{ pinyin: "shuán", meaning: "archaic variant of 拴 (shuān) — to tie / to fasten", rare: true },{ pinyin: "shuǎn", meaning: "to trick / to cheat (dialectal)" },{ pinyin: "shuàn", meaning: "to rinse / to cook in boiling water (hotpot)" }] },
+  shuang: { tones: [{ pinyin: "shuāng", meaning: "double / pair / frost / clear-headed" },{ pinyin: "shuáng", meaning: "archaic variant of 双 (shuāng) — double / pair / frost", rare: true },{ pinyin: "shuǎng", meaning: "refreshing / bright / frank / to deviate" },{ pinyin: "shuàng", meaning: "archaic variant of 爽 (shuǎng) — refreshing / bright / frank", rare: true }] },
+  shui: { tones: [{ pinyin: "shuí", meaning: "who — variant of 谁 (shéi), appears in 是谁 (who is it)" },{ pinyin: "shuí", meaning: "who (variant)" },{ pinyin: "shuǐ", meaning: "water / river / liquid — appears in 水 (shuǐ)" },{ pinyin: "shuì", meaning: "to sleep / to go to bed / tax" }] },
+  shun: { tones: [{ pinyin: "shūn", meaning: "archaic variant of 顺 (shùn) — smooth / to follow", rare: true },{ pinyin: "shún", meaning: "archaic variant — appears in 顺 compounds", rare: true },{ pinyin: "shǔn", meaning: "to suck — appears in 吮 (shǔn, to suck/absorb)" },{ pinyin: "shùn", meaning: "to go along / smooth — appears in 顺利 shùnlì (smoothly)" }] },
+  shuo: { tones: [{ pinyin: "shuō", meaning: "to say / to speak / to explain" },{ pinyin: "shuó", meaning: "large / bright / (rare)" },{ pinyin: "shuǒ", meaning: "archaic variant of 硕 (shuò) — large / appears in 硕士 (master's degree)", rare: true },{ pinyin: "shuò", meaning: "large / bright / frequently / to melt" }] },
+  si: { tones: [{ pinyin: "sī", meaning: "silk / to think / private" },{ pinyin: "sí", meaning: "appears in 死 (sǐ) dialectal variants — to die / dead", rare: true },{ pinyin: "sǐ", meaning: "to die / dead / fixed / extremely" },{ pinyin: "sì", meaning: "four / to resemble / to give / temple" }] },
+  song: { tones: [{ pinyin: "sōng", meaning: "loose / pine tree / to loosen / lax" },{ pinyin: "sóng", meaning: "appears in 松 (sōng) variants — pine / loose / to relax", rare: true },{ pinyin: "sǒng", meaning: "to alarm / to push / to stand on tiptoe" },{ pinyin: "sòng", meaning: "to send / to deliver / to escort / Song dynasty" }] },
+  sou: { tones: [{ pinyin: "sōu", meaning: "to search / vessel (boats measure word)" },{ pinyin: "sóu", meaning: "appears in 搜 (sōu) variants — to search / to seek", rare: true },{ pinyin: "sǒu", meaning: "old man / to search / to urge" },{ pinyin: "sòu", meaning: "to cough" }] },
+  su: { tones: [{ pinyin: "sū", meaning: "to revive / flaky (pastry) / Soviet / Jiangsu" },{ pinyin: "sú", meaning: "custom / vulgar / common / worldly" },{ pinyin: "sǔ", meaning: "to model / to mold" },{ pinyin: "sù", meaning: "speed / to tell / to sue / simple / vegetarian" }] },
+  suan: { tones: [{ pinyin: "suān", meaning: "sour / acid / to ache / pedantic" },{ pinyin: "suán", meaning: "garlic" },{ pinyin: "suǎn", meaning: "archaic variant of 蒜 (suàn) — garlic / to calculate", rare: true },{ pinyin: "suàn", meaning: "garlic / to calculate / to count / to plan" }] },
+  sui: { tones: [{ pinyin: "suī", meaning: "although / even though" },{ pinyin: "suí", meaning: "to follow / Sui dynasty / as one wishes" },{ pinyin: "suǐ", meaning: "marrow / pith" },{ pinyin: "suì", meaning: "year (of age) / to break / years / ears of grain" }] },
+  sun: { tones: [{ pinyin: "sūn", meaning: "grandson / Sun (surname)" },{ pinyin: "sún", meaning: "bamboo shoot / to damage" },{ pinyin: "sǔn", meaning: "to damage / to harm / to decrease" },{ pinyin: "sùn", meaning: "archaic variant of 损 (sǔn) — to damage / to harm", rare: true }] },
+  suo: { tones: [{ pinyin: "suō", meaning: "to shrink / to withdraw / to shuttle / litter (for carrying)" },{ pinyin: "suó", meaning: "archaic variant — appears in 索 (suǒ, rope/to search) forms", rare: true },{ pinyin: "suǒ", meaning: "place / to lock / what / (measure word for buildings)" },{ pinyin: "suò", meaning: "archaic variant of 所 (suǒ) — place / what / to lock", rare: true }] },
+
+  // --- T ---
+  ta: { tones: [{ pinyin: "tā", meaning: "he / she / it / other" },{ pinyin: "tá", meaning: "appears in 它 (tā) variants — it / other", rare: true },{ pinyin: "tǎ", meaning: "pagoda / tower" },{ pinyin: "tà", meaning: "to step on / to trample / to go on a trip" }] },
+  tai: { tones: [{ pinyin: "tāi", meaning: "fetus / embryo / tire" },{ pinyin: "tái", meaning: "platform / stage / Taiwan / to lift" },{ pinyin: "tǎi", meaning: "appears in 台 (tái) variants — platform / stage / Taiwan", rare: true },{ pinyin: "tài", meaning: "too / very / grand / extremely / Tai (as in Taiji)" }] },
+  tan: { tones: [{ pinyin: "tān", meaning: "to spread out / greedy / beach / stall / paralyzed" },{ pinyin: "tán", meaning: "pool / to chat / to play (instrument) / calm" },{ pinyin: "tǎn", meaning: "flat / honest / blanket / carpet" },{ pinyin: "tàn", meaning: "charcoal / carbon / to sigh / to explore" }] },
+  tao: { tones: [{ pinyin: "tāo", meaning: "to pull out / to reach into / wave" },{ pinyin: "táo", meaning: "to escape / peach / pottery / to wash (grain)" },{ pinyin: "tǎo", meaning: "to ask for / to seek / to discuss / to punish" },{ pinyin: "tào", meaning: "cover / set / to cover / to ensnare / suit (measure word)" }] },
+  te: { tones: [{ pinyin: "tē", meaning: "appears in 特 (tè) variants — special / particularly", rare: true },{ pinyin: "té", meaning: "appears in 特 (tè) variants — special agent / particular", rare: true },{ pinyin: "tě", meaning: "archaic variant of 特 — special / unique", rare: true },{ pinyin: "tè", meaning: "special / particularly / secret agent" }] },
+  teng: { tones: [{ pinyin: "téng", meaning: "to pain / rattan / to gallop / to soar" },{ pinyin: "téng", meaning: "to pain / rattan / to gallop / to soar" },{ pinyin: "těng", meaning: "archaic variant of 疼 (téng) — to ache / to love dearly", rare: true },{ pinyin: "tèng", meaning: "archaic variant — appears in pain/ache compounds", rare: true }] },
+  ti: { tones: [{ pinyin: "tī", meaning: "to kick / ladder / to type (on keys)" },{ pinyin: "tí", meaning: "to mention / to carry / topic / to cry (animal)" },{ pinyin: "tǐ", meaning: "body / style / system / to realize" },{ pinyin: "tì", meaning: "to replace / tearful / shaved / for (someone)" }] },
+  tian: { tones: [{ pinyin: "tiān", meaning: "sky / heaven / day / weather" },{ pinyin: "tián", meaning: "sweet / field / to fill in" },{ pinyin: "tiǎn", meaning: "to lick / to feel ashamed" },{ pinyin: "tiàn", meaning: "to fill in / to add / to bury (rare)" }] },
+  tiao: { tones: [{ pinyin: "tiāo", meaning: "to carry on shoulder / to choose / picky" },{ pinyin: "tiáo", meaning: "strip / to adjust / to tease / branch" },{ pinyin: "tiǎo", meaning: "to provoke / to stir up / to poke" },{ pinyin: "tiào", meaning: "to jump / to skip / to bounce" }] },
+  tie: { tones: [{ pinyin: "tiē", meaning: "to stick / to paste / subsidy / close to" },{ pinyin: "tié", meaning: "rubbing (of inscription)" },{ pinyin: "tiě", meaning: "iron / railroad / firm" },{ pinyin: "tiè", meaning: "copybook (calligraphy)" }] },
+  ting: { tones: [{ pinyin: "tīng", meaning: "to listen / to hear / to allow / hall" },{ pinyin: "tíng", meaning: "to stop / to park / court / pavilion" },{ pinyin: "tǐng", meaning: "very / quite / straight / to stick out" },{ pinyin: "tìng", meaning: "appears in 听 (tīng) variants — to listen / to obey", rare: true }] },
+  tong: { tones: [{ pinyin: "tōng", meaning: "to connect / through / to notify / general" },{ pinyin: "tóng", meaning: "same / together / child / copper" },{ pinyin: "tǒng", meaning: "barrel / tube / to unify / to control" },{ pinyin: "tòng", meaning: "pain / to ache / very / painful" }] },
+  tou: { tones: [{ pinyin: "tōu", meaning: "to steal / secretly / to sneak" },{ pinyin: "tóu", meaning: "head / first / top / leader / measure word for animals" },{ pinyin: "tǒu", meaning: "archaic variant of 透 (tòu) — through / penetrating", rare: true },{ pinyin: "tòu", meaning: "through / penetrating / to tell secretly / transparent" }] },
+  tu: { tones: [{ pinyin: "tū", meaning: "bald / protruding / sudden / convex" },{ pinyin: "tú", meaning: "picture / map / to plan / disciple / on foot" },{ pinyin: "tǔ", meaning: "earth / soil / local / to vomit" },{ pinyin: "tù", meaning: "rabbit / to vomit" }] },
+  tuan: { tones: [{ pinyin: "tuān", meaning: "rapid (water)" },{ pinyin: "tuán", meaning: "group / organization / sphere / roll" },{ pinyin: "tuǎn", meaning: "archaic variant of 团 (tuán) — group / sphere / to unite", rare: true },{ pinyin: "tuàn", meaning: "archaic variant of 团 — organization / ball / to gather", rare: true }] },
+  tui: { tones: [{ pinyin: "tuī", meaning: "to push / to promote / to deduce" },{ pinyin: "tuí", meaning: "to fall / to decline" },{ pinyin: "tuǐ", meaning: "leg / thigh" },{ pinyin: "tuì", meaning: "to retreat / to return / to fade / to shed" }] },
+  tun: { tones: [{ pinyin: "tūn", meaning: "to swallow / to take over" },{ pinyin: "tún", meaning: "to store / to station / buttocks / village" },{ pinyin: "tǔn", meaning: "archaic variant of 吞 (tūn) — to swallow / to take over", rare: true },{ pinyin: "tùn", meaning: "archaic variant — appears in 褪 (tuì, to fade/shed) forms", rare: true }] },
+  tuo: { tones: [{ pinyin: "tuō", meaning: "to drag / to hold / to entrust / to delay" },{ pinyin: "tuó", meaning: "camel / to carry on back / appropriate" },{ pinyin: "tuǒ", meaning: "oval / appropriate / settled" },{ pinyin: "tuò", meaning: "saliva / to develop / to expand" }] },
+
+  // --- W ---
+  wa: { tones: [{ pinyin: "wā", meaning: "to dig / wow! / frog" },{ pinyin: "wá", meaning: "baby / doll" },{ pinyin: "wǎ", meaning: "tile / roof tile / watt" },{ pinyin: "wà", meaning: "socks / stockings" }] },
+  wai: { tones: [{ pinyin: "wāi", meaning: "crooked / askew / devious" },{ pinyin: "wái", meaning: "appears in 歪 (wāi) variants — crooked / devious", rare: true },{ pinyin: "wǎi", meaning: "to sprain (ankle)" },{ pinyin: "wài", meaning: "outside / foreign / other / extra" }] },
+  wan: { tones: [{ pinyin: "wān", meaning: "bay / to bend / to curve" },{ pinyin: "wán", meaning: "to play / to finish / pill / complete" },{ pinyin: "wǎn", meaning: "evening / late / bowl" },{ pinyin: "wàn", meaning: "ten thousand / all / extremely" }] },
+  wang: { tones: [{ pinyin: "wāng", meaning: "expanse of water / to bark / Wang (surname)" },{ pinyin: "wáng", meaning: "king / to die / to flee" },{ pinyin: "wǎng", meaning: "net / internet / toward / in vain" },{ pinyin: "wàng", meaning: "to forget / to hope / to gaze / prosperous" }] },
+  wei: { tones: [{ pinyin: "wēi", meaning: "tiny / micro / danger / prestige / tail" },{ pinyin: "wéi", meaning: "to do / to act as / to surround / to maintain" },{ pinyin: "wěi", meaning: "false / great / tail / to entrust / to wilt" },{ pinyin: "wèi", meaning: "for / because / to call / not yet / taste / position" }] },
+  wo: { tones: [{ pinyin: "wō", meaning: "nest / den / to harbor" },{ pinyin: "wó", meaning: "archaic variant of 我 (wǒ) — I / me / my (classical)", rare: true },{ pinyin: "wǒ", meaning: "I / me / my" },{ pinyin: "wò", meaning: "to lie / to hold / to shake hands" }] },
+  wu: { tones: [{ pinyin: "wū", meaning: "room / house / black / crow / oh! (surprise)" },{ pinyin: "wú", meaning: "no / without / not / Wu (ancient state)" },{ pinyin: "wǔ", meaning: "five / noon / military / to insult / dance" },{ pinyin: "wù", meaning: "thing / object / matter / to understand / to meet" }] },
+
+  // --- X ---
+  xi: { tones: [{ pinyin: "xī", meaning: "west / to hope / to absorb / rare / creek" },{ pinyin: "xí", meaning: "to practice / seat / to attack / mat" },{ pinyin: "xǐ", meaning: "to wash / to develop (film) / joy / to like" },{ pinyin: "xì", meaning: "system / series / to tie / drama / thin / to relate" }] },
+  xia: { tones: [{ pinyin: "xiā", meaning: "shrimp / blind / randomly / to mess around" },{ pinyin: "xiá", meaning: "gorge / rosy sky / narrow" },{ pinyin: "xià", meaning: "below / under / to go down / summer / next" },{ pinyin: "xià", meaning: "below / under / to go down / summer / next" }] },
+  xian: { tones: [{ pinyin: "xiān", meaning: "fresh / first / immortal / Xian (city)" },{ pinyin: "xián", meaning: "string (of instrument) / leisure / salty / to dislike" },{ pinyin: "xiǎn", meaning: "dangerous / rare / barely / to show" },{ pinyin: "xiàn", meaning: "county / to appear / present / limit / wire / filling" }] },
+  xiang: { tones: [{ pinyin: "xiāng", meaning: "fragrant / rural / mutual / Hunan / Xiang" },{ pinyin: "xiáng", meaning: "detailed / auspicious / to surrender" },{ pinyin: "xiǎng", meaning: "to think / to miss / to want / sound / to echo" },{ pinyin: "xiàng", meaning: "toward / elephant / appearance / lane / to resemble" }] },
+  xiao: { tones: [{ pinyin: "xiāo", meaning: "to whittle / to cancel / night / to melt" },{ pinyin: "xiáo", meaning: "appears in 肖 (xiào) variants — to resemble / portrait", rare: true },{ pinyin: "xiǎo", meaning: "small / young / little / a bit" },{ pinyin: "xiào", meaning: "to laugh / school / to resemble / filial piety / to whistle" }] },
+  xie: { tones: [{ pinyin: "xiē", meaning: "some / a little / to rest" },{ pinyin: "xié", meaning: "together / to assist / evil / shoes / oblique" },{ pinyin: "xiě", meaning: "to write / to describe" },{ pinyin: "xiè", meaning: "to thank / to apologize / to unload / to wither" }] },
+  xin: { tones: [{ pinyin: "xīn", meaning: "heart / mind / center / new / Xin" },{ pinyin: "xín", meaning: "appears in 心 (xīn) variants — heart / mind / center", rare: true },{ pinyin: "xǐn", meaning: "archaic variant — appears in 心 classical compounds", rare: true },{ pinyin: "xìn", meaning: "trust / letter / to believe / message" }] },
+  xing: { tones: [{ pinyin: "xīng", meaning: "star / spark / to start / to rise" },{ pinyin: "xíng", meaning: "to walk / form / OK / to punish / type" },{ pinyin: "xǐng", meaning: "to wake up / to be sober / to examine oneself" },{ pinyin: "xìng", meaning: "surname / nature / sex / lucky / interest" }] },
+  xiong: { tones: [{ pinyin: "xiōng", meaning: "chest / heart / fierce / ominous / Hun" },{ pinyin: "xióng", meaning: "bear (animal) / male / powerful / heroic" },{ pinyin: "xiǒng", meaning: "archaic variant of 凶 (xiōng) — fierce / ominous", rare: true },{ pinyin: "xiòng", meaning: "archaic variant — appears in chest/fierce classical terms", rare: true }] },
+  xiu: { tones: [{ pinyin: "xiū", meaning: "to rest / to repair / to study / sleeve" },{ pinyin: "xiú", meaning: "excellent / sleeve / to embroider" },{ pinyin: "xiǔ", meaning: "rotten / decayed / night" },{ pinyin: "xiù", meaning: "to embroider / elegant / to show off / smell" }] },
+  xu: { tones: [{ pinyin: "xū", meaning: "need / must / slowly / beard / to wait" },{ pinyin: "xú", meaning: "slowly / gentle / Xu (surname)" },{ pinyin: "xǔ", meaning: "to allow / to promise / somewhat / Xu (place)" },{ pinyin: "xù", meaning: "to continue / preface / order / to chat / warm" }] },
+  xuan: { tones: [{ pinyin: "xuān", meaning: "to declare / noisy / Xuan (name)" },{ pinyin: "xuán", meaning: "to hang / mysterious / to rotate / far" },{ pinyin: "xuǎn", meaning: "to choose / election / anthology" },{ pinyin: "xuàn", meaning: "dazzling / to show off / to turn / to faint" }] },
+  xue: { tones: [{ pinyin: "xuē", meaning: "to pare / boot (shoe)" },{ pinyin: "xué", meaning: "to study / to learn / school / imitate" },{ pinyin: "xuě", meaning: "snow" },{ pinyin: "xuè", meaning: "blood / blood (formal pronunciation)" }] },
+  xun: { tones: [{ pinyin: "xūn", meaning: "to smoke / to fumigate / fragrant" },{ pinyin: "xún", meaning: "to search / to patrol / to ask" },{ pinyin: "xǔn", meaning: "archaic variant of 训 (xùn) — to train / to scold", rare: true },{ pinyin: "xùn", meaning: "to train / to scold / flood / swift / to tame" }] },
+
+  // --- Z ---
+  za: { tones: [{ pinyin: "zā", meaning: "to tie / to bind" },{ pinyin: "zá", meaning: "mixed / to smash / to pound" },{ pinyin: "zǎ", meaning: "how / why (dialectal)" },{ pinyin: "zà", meaning: "appears in 咋 (zǎ/zà) dialectal — how / why / what", rare: true }] },
+  zai: { tones: [{ pinyin: "zāi", meaning: "disaster / calamity / to plant" },{ pinyin: "zái", meaning: "archaic variant of 再 (zài) — again / in / at", rare: true },{ pinyin: "zǎi", meaning: "to slaughter / to carry / year / son" },{ pinyin: "zài", meaning: "again / in / at / to be present / to continue" }] },
+  zan: { tones: [{ pinyin: "zān", meaning: "hairpin / to insert" },{ pinyin: "zán", meaning: "we (inclusive) / I (dialectal)" },{ pinyin: "zǎn", meaning: "to accumulate / to save" },{ pinyin: "zàn", meaning: "to praise / to support / temporarily" }] },
+  zang: { tones: [{ pinyin: "zāng", meaning: "dirty / filthy / internal organs" },{ pinyin: "záng", meaning: "Tibet / to store / Zang (surname)" },{ pinyin: "zǎng", meaning: "archaic variant of 脏 (zāng/zàng) — dirty / internal organs", rare: true },{ pinyin: "zàng", meaning: "to bury / funeral / Tibet / viscera" }] },
+  zao: { tones: [{ pinyin: "zāo", meaning: "distillers grain / rotten / in a mess / to waste" },{ pinyin: "záo", meaning: "chisel / to chisel / to dig" },{ pinyin: "zǎo", meaning: "early / morning / long ago / date (fruit) / flea" },{ pinyin: "zào", meaning: "dry / to make / stove / to bathe" }] },
+  ze: { tones: [{ pinyin: "zē", meaning: "archaic variant of 泽 (zé) — marsh / grace / to moisten", rare: true },{ pinyin: "zé", meaning: "standard / rule / responsibility / then / to choose" },{ pinyin: "zě", meaning: "archaic variant — appears in 则 (zé, standard/rule) classical forms", rare: true },{ pinyin: "zè", meaning: "oblique tone / narrow / pressed" }] },
+  zei: { tones: [{ pinyin: "zēi", meaning: "archaic variant of 贼 (zéi) — thief / very / stealthy", rare: true },{ pinyin: "zéi", meaning: "thief / traitor / very / stealthy" },{ pinyin: "zěi", meaning: "archaic variant of 贼 — thief / traitor", rare: true },{ pinyin: "zèi", meaning: "archaic variant of 贼 — bandit / very (dialectal)", rare: true }] },
+  zen: { tones: [{ pinyin: "zēn", meaning: "archaic variant of 怎 (zěn) — how / why / what", rare: true },{ pinyin: "zén", meaning: "archaic variant of 怎 — how come / in what way", rare: true },{ pinyin: "zěn", meaning: "how / why / what" },{ pinyin: "zèn", meaning: "to slander / to frame (rare)" }] },
+  zeng: { tones: [{ pinyin: "zēng", meaning: "to increase / once (past) / great (generational prefix)" },{ pinyin: "zéng", meaning: "archaic variant of 增/曾 — to increase / once (past)", rare: true },{ pinyin: "zěng", meaning: "to hate — appears in 憎恨 zēnghèn (to hate/detest)", rare: true },{ pinyin: "zèng", meaning: "to give as gift / to present" }] },
+  zha: { tones: [{ pinyin: "zhā", meaning: "to prick / to plunge / to tie / dregs / to examine" },{ pinyin: "zhá", meaning: "to deep-fry / sluice gate / to open/close eyes rapidly" },{ pinyin: "zhǎ", meaning: "to blink / to wink" },{ pinyin: "zhà", meaning: "to explode / to blast / suddenly / to pretend" }] },
+  zhai: { tones: [{ pinyin: "zhāi", meaning: "to pick / to pluck / to remove" },{ pinyin: "zhái", meaning: "house / residence / to stay home" },{ pinyin: "zhǎi", meaning: "narrow / tight" },{ pinyin: "zhài", meaning: "debt / stronghold / village" }] },
+  zhan: { tones: [{ pinyin: "zhān", meaning: "to moisten / to touch / felt (material)" },{ pinyin: "zhán", meaning: "archaic variant of 站 (zhàn) — to stand / station / war", rare: true },{ pinyin: "zhǎn", meaning: "to open / to spread / exhibition" },{ pinyin: "zhàn", meaning: "to stand / station / war / to occupy / to tremble" }] },
+  zhang: { tones: [{ pinyin: "zhāng", meaning: "to open / chapter / seal / measure word for flat things" },{ pinyin: "zhàng", meaning: "husband / strong / Zhang (surname)" },{ pinyin: "zhǎng", meaning: "palm / in charge / to grow / elder" },{ pinyin: "zhàng", meaning: "account / tent / battle / to lean on / one decameter" }] },
+  zhao: { tones: [{ pinyin: "zhāo", meaning: "morning / move (chess) / to recruit / to beckon" },{ pinyin: "zháo", meaning: "to touch / to catch fire / to fall asleep" },{ pinyin: "zhǎo", meaning: "to look for / claw / to seek" },{ pinyin: "zhào", meaning: "to shine / to take a photo / according to / omen" }] },
+  zhe: { tones: [{ pinyin: "zhē", meaning: "to cover / to block / to hide" },{ pinyin: "zhé", meaning: "to break / to fold / to turn / wise" },{ pinyin: "zhě", meaning: "person who / the one that (suffix)" },{ pinyin: "zhè", meaning: "this / here / sugarcane" }] },
+  zhen: { tones: [{ pinyin: "zhēn", meaning: "needle / injection / real / to examine" },{ pinyin: "zhén", meaning: "archaic variant of 真 (zhēn) — real / genuine / needle", rare: true },{ pinyin: "zhěn", meaning: "pillow / to pillow / to examine (pulse)" },{ pinyin: "zhèn", meaning: "to shake / earthquake / battle formation / town" }] },
+  zheng: { tones: [{ pinyin: "zhēng", meaning: "to steam / to strive / to open eyes / zheng (instrument)" },{ pinyin: "zhéng", meaning: "archaic variant of 整 (zhěng) — whole / neat / to fix", rare: true },{ pinyin: "zhěng", meaning: "whole / complete / neat / to put in order" },{ pinyin: "zhèng", meaning: "correct / just / government / politics / proof" }] },
+  zhi: { tones: [{ pinyin: "zhī", meaning: "to know / branch / to support / measure word (for long thin things)" },{ pinyin: "zhí", meaning: "straight / nephew / value / to plant / to execute" },{ pinyin: "zhǐ", meaning: "paper / only / to stop / to point / finger / toe" },{ pinyin: "zhì", meaning: "to / ambition / will / to send / to make / wisdom" }] },
+  zhong: { tones: [{ pinyin: "zhōng", meaning: "middle / center / China / clock / loyal" },{ pinyin: "zhóng", meaning: "archaic variant of 重 (zhòng) — heavy / important", rare: true },{ pinyin: "zhǒng", meaning: "seed / type / species / race" },{ pinyin: "zhòng", meaning: "heavy / important / to hit / to fall into" }] },
+  zhou: { tones: [{ pinyin: "zhōu", meaning: "porridge / boat / Zhou dynasty / continent" },{ pinyin: "zhóu", meaning: "axle / axis / scroll (painting)" },{ pinyin: "zhǒu", meaning: "elbow / broom" },{ pinyin: "zhòu", meaning: "wrinkle / spell / to curse / daytime / sudden" }] },
+  zhu: { tones: [{ pinyin: "zhū", meaning: "pig / red / pearl / Zhu (surname)" },{ pinyin: "zhú", meaning: "bamboo / to pursue / one by one / candle" },{ pinyin: "zhǔ", meaning: "owner / master / God / to cook / to advocate" },{ pinyin: "zhù", meaning: "to live / to stay / to build / to wish / to note" }] },
+  zhua: { tones: [{ pinyin: "zhuā", meaning: "to grab / to scratch / to arrest / to focus on" },{ pinyin: "zhuá", meaning: "archaic variant of 爪 (zhuǎ) — claw / paw", rare: true },{ pinyin: "zhuǎ", meaning: "claw / paw" },{ pinyin: "zhuà", meaning: "archaic variant — appears in grab/claw classical forms", rare: true }] },
+  zhuai: { tones: [{ pinyin: "zhuāi", meaning: "to throw / to swing" },{ pinyin: "zhuǎi", meaning: "to walk affectedly — appears in 拽 (zhuài) variants" },{ pinyin: "zhuài", meaning: "to drag / pull — appears in 拽 (zhuài, to drag/pull)" },{ pinyin: "zhuài", meaning: "to drag / to pull (dialectal)" }] },
+  zhuan: { tones: [{ pinyin: "zhuān", meaning: "special / focused / exclusive / brick" },{ pinyin: "zhuán", meaning: "biography / chronicle" },{ pinyin: "zhuǎn", meaning: "to turn / to transfer / to pass on" },{ pinyin: "zhuàn", meaning: "to earn / to rotate / biography" }] },
+  zhuang: { tones: [{ pinyin: "zhuāng", meaning: "village / solemn / to dress up / Zhuang (ethnicity)" },{ pinyin: "zhuáng", meaning: "archaic variant of 装 (zhuāng) — to dress up / village", rare: true },{ pinyin: "zhuǎng", meaning: "archaic variant of 壮 (zhuàng) — strong / to bump", rare: true },{ pinyin: "zhuàng", meaning: "strong / to bump / condition / suit (at cards)" }] },
+  zhui: { tones: [{ pinyin: "zhuī", meaning: "to chase / to pursue / to recall / to add" },{ pinyin: "zhuí", meaning: "archaic variant of 追 (zhuī) — to chase / to pursue", rare: true },{ pinyin: "zhuǐ", meaning: "archaic variant of 嘴 (zuǐ) — mouth / beak / spout", rare: true },{ pinyin: "zhuì", meaning: "to fall / to hang / to attach / pendant" }] },
+  zhun: { tones: [{ pinyin: "zhūn", meaning: "earnest — appears in 谆谆 zhūnzhūn (earnest/sincere admonition)" },{ pinyin: "zhún", meaning: "to allow / accurate / standard / quasi-" },{ pinyin: "zhǔn", meaning: "to allow / accurate / standard" },{ pinyin: "zhùn", meaning: "archaic variant of 准 (zhǔn) — accurate / to allow", rare: true }] },
+  zhuo: { tones: [{ pinyin: "zhuō", meaning: "table / clumsy / to grab" },{ pinyin: "zhuó", meaning: "to burn / outstanding / to pour wine / to wear" },{ pinyin: "zhuǒ", meaning: "archaic variant of 桌 (zhuō) — table / clumsy", rare: true },{ pinyin: "zhuò", meaning: "turbid / to pour / to wear / profound" }] },
+  zi: { tones: [{ pinyin: "zī", meaning: "to consult / resources / character / appearance" },{ pinyin: "zí", meaning: "archaic variant of 紫 (zǐ) — purple / violet", rare: true },{ pinyin: "zǐ", meaning: "son / child / seed / you (honorific) / purple" },{ pinyin: "zì", meaning: "character / word / self / from" }] },
+  zong: { tones: [{ pinyin: "zōng", meaning: "palm tree / brown / family / school (of thought)" },{ pinyin: "zóng", meaning: "archaic variant of 总 (zǒng) — always / total / general", rare: true },{ pinyin: "zǒng", meaning: "always / to sum up / general / chief / total" },{ pinyin: "zòng", meaning: "vertical / to indulge / even if / rice dumpling" }] },
+  zou: { tones: [{ pinyin: "zōu", meaning: "Zou (surname/place)" },{ pinyin: "zóu", meaning: "archaic variant of 走 (zǒu) — to walk / to go / to leave", rare: true },{ pinyin: "zǒu", meaning: "to walk / to go / to leave / to run" },{ pinyin: "zòu", meaning: "to play music / to beat / to present to emperor" }] },
+  zu: { tones: [{ pinyin: "zū", meaning: "to rent / to lease / rent" },{ pinyin: "zú", meaning: "foot / enough / sufficient / group / ethnic group" },{ pinyin: "zǔ", meaning: "ancestor / grandparent / to block / to organize" },{ pinyin: "zù", meaning: "archaic variant of 族 (zú) — clan / ethnic group", rare: true }] },
+  zuan: { tones: [{ pinyin: "zuān", meaning: "to drill / to bore / to study hard" },{ pinyin: "zuán", meaning: "drill (tool)" },{ pinyin: "zuǎn", meaning: "to compile / to braid" },{ pinyin: "zuàn", meaning: "diamond / to grip / drill (tool)" }] },
+  zui: { tones: [{ pinyin: "zuī", meaning: "archaic variant of 嘴 (zuǐ) — mouth / beak / spout", rare: true },{ pinyin: "zuí", meaning: "mouth / beak / spout" },{ pinyin: "zuǐ", meaning: "mouth / beak / spout" },{ pinyin: "zuì", meaning: "most / -est / drunk / crime / guilt" }] },
+  zun: { tones: [{ pinyin: "zūn", meaning: "to respect / to follow / senior / honored" },{ pinyin: "zún", meaning: "archaic variant of 尊 (zūn) — to respect / honored", rare: true },{ pinyin: "zǔn", meaning: "archaic variant of 尊 — respect / senior", rare: true },{ pinyin: "zùn", meaning: "archaic variant — appears in 尊 respect/honor compounds", rare: true }] },
+  zuo: { tones: [{ pinyin: "zuō", meaning: "workshop — appears in 作坊 zuōfang (workshop/small factory)" },{ pinyin: "zuó", meaning: "yesterday" },{ pinyin: "zuǒ", meaning: "left / wrong / different" },{ pinyin: "zuò", meaning: "to do / to sit / to make / seat / measure word (for mountains)" }] }
+};
+
+console.log('Total syllables:', Object.keys(ALL_SYLLABLES).length);
+
+// User stories pre-loaded from doc
+const PRESET_STORIES = {
+  bi: { story: "BIsexual oBIwan kenoBI uses the FORCE (bī) to move a guy with a huge NOSE (bí), using him to write with a PEN (bǐ) from his nostril — writing dollar signs as CURRENCY (bì).", anchor: "OBI-WAN, BI" },
+  yan: { story: "Meester Jan has his mouth stuffed with lit cigarettes (SMOKE, yān). At the Dead Sea someone throws a tonne of SALT (yán) in his face. His EYE (yǎn) glows and Mike from Monsters Inc. comes to help, but a WILD GOOSE (yàn) stuffs its beak into Mike's ass.", anchor: "MEESTER JAN (Yan)" },
+  gan: { story: "Gani licks a giant squeaky CLEAN HOLLOW plate in the DRY (gān) desert. It gets watered with grey SLOP (gán) and a hot woman crawls out. A shy nerd DARES (gǎn) to hit on her. His boss (the slug from Monsters Inc.) screams 'Get to WORK! (gàn)'", anchor: "GANI" },
+  wen: { story: "Wendy from Wendy's curls up by a fire in Turkmenistan to stay WARM (wēn). She writes in blood about Chinese CULTURE & LANGUAGE (wén). She KISSes (wěn) her notebook. It becomes sentient and ASKs (wèn) her if she wants to bang.", anchor: "WENDY'S" },
+  tang: { story: "Tang orange soda poured into green pea SOUP (tāng). An old SUGAR daddy with CANDY arms (táng) tastes it, throws up, and goes to LIE DOWN (tǎng) in a sauna. He realises it's BURNING HOT (tàng) and shoots through the roof.", anchor: "TANG ORANGE SODA" },
+  li: { story: "A French anthropomorphic bed (béret) smiles at a cat's PURR (lī). A huge bag of PEARS (lí) drops on the cat. Someone politely packs the remains in a GIFT box (lǐ). Mike Israetel lifts it like a bodybuilder, showing STRENGTH (lì).", anchor: "LIT (bed in French)" },
+  shi: { story: "Winnie the Pooh dressed as Shakespeare performs a POEM (shī). He eats a grandfather clock (TIME, shí), takes a massive SHIT (shǐ). Out of it a whole CITY with a stock MARKET (shì) forms.", anchor: "SHAKESPEARE → SHI" },
+  yi: { story: "A DOCTOR (yī, medical) in hundreds of CLOTHES layers faints near his nurse. Mick Jagger makes him MOVE (yí). He sits on a CHAIR (yǐ) that breaks — a piece goes up his brain and gives him a life-changing IDEA (yì).", anchor: "YĪSHĒNG (doctor)" },
+  ma: { story: "Jennifer Lawrence as MOTHER (mā) feels NUMB (má) as Javier Bardem drills peppers into her tongue. Her drool falls on a HORNY HORSE (mǎ) below, smiling. The horse's owner, a Kyrgyz man, SCOLDs (mà) the horse with a headless goat carcass.", anchor: "MAMA" },
+  ba: { story: "A leprechaun shakes a magic 8-ball (EIGHT, bā). Conan O'Brien PULLS him OUT (bá), then HOLDS (bǎ) him tight kissing him all over. Phil Dunphy in a 'World's #1 DAD' shirt (bà) approaches Conan to pitch a joke.", anchor: "BABA (dad)" },
+  qi: { story: "Kevin Spacey from SEVEN (qī) jumps on a camel and RIDES (qí). The camel starts to RISE (qǐ) into the sky. They reach space and find a GAS giant with an astronaut playing AIR guitar (qì).", anchor: "QI (life force)" },
+  gu: { story: "Your AUNT (gū) estimates how many pigeons are on a roof. She grabs a DRUM (gǔ) and beats it to scare them. The drumbeats echo like an ANCIENT (gù) story being told.", anchor: "GUGU (aunt)" }
+};
+
+let syls = {}, curSyl = null, rQueue = [], rIdx = 0;
+let mediaRec = null, chunks = [], isRec = false;
+let activeFilter = 'all';
+
+function init() {
+  const saved = localStorage.getItem('mnem_v3');
+  if (saved) {
+    syls = JSON.parse(saved);
+    for (const [k,v] of Object.entries(ALL_SYLLABLES)) {
+      if (!syls[k]) syls[k] = { tones: v.tones, story: '', anchor: '', srs: { interval:1, ease:2.5, due:Date.now(), reps:0 } };
+      else syls[k].tones = v.tones;
+    }
+  } else {
+    for (const [k,v] of Object.entries(ALL_SYLLABLES)) {
+      const pre = PRESET_STORIES[k] || {};
+      syls[k] = { tones: v.tones, story: pre.story||'', anchor: pre.anchor||'', srs: { interval:1, ease:2.5, due:Date.now(), reps:0 } };
+    }
+  }
+  save();
+}
+
+function save() { localStorage.setItem('mnem_v3', JSON.stringify(syls)); }
+
+function updateStats() {
+  const vals = Object.values(syls);
+  const total = vals.length, done = vals.filter(s=>s.story).length, due = vals.filter(s=>s.story&&s.srs.due<=Date.now()).length;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-due').textContent = due;
+  document.getElementById('pbar').style.width = (total?Math.round(done/total*100):0)+'%';
+  document.getElementById('hdr-s').textContent = done+' of '+total+' stories built';
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  ['all','todo','done','due'].forEach(x => document.getElementById('f-'+x).classList.toggle('on', x===f));
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const now = Date.now();
+  const keys = getSortedKeys(activeFilter);
+  grid.innerHTML = keys.map(k => {
+    const s = syls[k];
+    return `<div class="sc ${s.story?'has':''}" onclick="openDet('${k}')">
+      <div class="sn">${k.toUpperCase()}</div>
+      <div class="ss">${s.story?'✓ story saved':'no story yet'}</div>
+      ${s.anchor?`<div class="sa">${s.anchor}</div>`:''}
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+function openDet(key) {
+  curSyl = key;
+  const s = syls[key];
+  const src = ALL_SYLLABLES[key];
+  let html = `<button class="bb" onclick="show('build')">← All syllables</button>`;
+  html += `<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
+    <span style="font-size:36px;font-weight:700">${key.toUpperCase()}</span>
+    <span style="font-size:13px;color:var(--text2)">${s.tones.map(t=>t.pinyin).join(' · ')}</span>
+  </div>`;
+  if (!s.anchor) html += `<div class="ban w">⚠️ No sound anchor yet — add one below!</div>`;
+  html += `<div class="card"><div class="sl">4 tones</div>`;
+  s.tones.forEach(t => {
+    const isRare = src && src.tones.find(st=>st.pinyin===t.pinyin)?.rare;
+    html += `<div class="tr"><div class="tp">${t.pinyin}</div><div class="tm">${t.meaning}${isRare?'<span class="rare-tag">rare</span>':''}</div></div>`;
+  });
+  html += `</div>`;
+  html += `<div class="sl">Sound anchor (for 1st tone)</div>
+  <input class="inp" id="anc" placeholder="e.g. Wendy's, OBI-WAN, MAMA..." value="${s.anchor||''}" style="margin-bottom:12px">`;
+  html += `<div class="sl" style="margin-top:4px">Your story</div>`;
+  html += `<div class="sd ${s.story?'':'empty'}" id="sdisplay">${s.story||'No story yet — record below'}</div>`;
+  html += `<button class="rb" id="rbtn" onclick="toggleRec()">🎙️ <span id="rlbl">Record story</span></button>`;
+  html += `<textarea class="inp" id="ta" placeholder="Story appears here after recording, or type directly...">${s.story||''}</textarea>`;
+  html += `<div style="margin-top:10px"><div class="br"><button class="btn" onclick="clrStory()">Clear</button><button class="btn p" id="savebtn" onclick="saveStory()">Save story</button></div></div>`;
+  document.getElementById('det').innerHTML = html;
+  show('detail');
+}
+
+async function toggleRec() {
+  if (isRec) { stopRec(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRec = new MediaRecorder(stream);
+    chunks = [];
+    mediaRec.ondataavailable = e => chunks.push(e.data);
+    mediaRec.onstop = processRec;
+    mediaRec.start();
+    isRec = true;
+    const btn = document.getElementById('rbtn');
+    btn.classList.add('rec','pulse');
+    document.getElementById('rlbl').textContent = 'Tap to stop';
+  } catch(e) { alert('Microphone access needed. Please allow mic in browser settings.'); }
+}
+
+function stopRec() {
+  if (mediaRec && mediaRec.state!=='inactive') { mediaRec.stop(); mediaRec.stream.getTracks().forEach(t=>t.stop()); }
+  isRec = false;
+  const btn = document.getElementById('rbtn');
+  if (btn) { btn.classList.remove('rec','pulse'); }
+  if (document.getElementById('rlbl')) document.getElementById('rlbl').textContent = 'Transcribing...';
+}
+
+async function processRec() {
+  const blob = new Blob(chunks, { type:'audio/webm' });
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const b64 = reader.result.split(',')[1];
+    const syl = curSyl;
+    const tones = syls[syl].tones;
+    try {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:500,
+          messages:[{ role:'user', content:[
+            { type:'text', text:`Transcribe this audio exactly. Speaker describes a mnemonic story for Mandarin syllable "${syl}" with tones: ${tones.map(t=>t.pinyin+'='+t.meaning).join(', ')}. Return ONLY the transcription, nothing else.` },
+            { type:'image', source:{ type:'base64', media_type:'audio/webm', data:b64 } }
+          ]}]
+        })
+      });
+      const data = await resp.json();
+      const text = data.content?.[0]?.text||'';
+      if (text && document.getElementById('ta')) document.getElementById('ta').value = text;
+    } catch(e) { console.log('Transcription error:',e); }
+    if (document.getElementById('rlbl')) document.getElementById('rlbl').textContent = 'Record again';
+  };
+  reader.readAsDataURL(blob);
+}
+
+function saveStory() {
+  const story = document.getElementById('ta').value.trim();
+  const anchor = document.getElementById('anc').value.trim();
+  if (!story) { alert('Add your story first'); return; }
+  syls[curSyl].story = story; syls[curSyl].anchor = anchor;
+  if (!syls[curSyl].srs.reps) syls[curSyl].srs.due = Date.now();
+  save();
+  const sd = document.getElementById('sdisplay');
+  sd.className = 'sd'; sd.textContent = story;
+  const btn = document.getElementById('savebtn');
+  btn.textContent = '✓ Saved!';
+  setTimeout(()=>{ if(btn) btn.textContent='Save story'; }, 1800);
+  updateStats();
+}
+
+function clrStory() { document.getElementById('ta').value = ''; }
+
+function buildRQ() {
+  return Object.entries(syls).filter(([k,s])=>s.story&&s.srs.due<=Date.now()).sort((a,b)=>a[1].srs.due-b[1].srs.due).map(([k])=>k);
+}
+
+function showReview() {
+  const q = buildRQ();
+  const el = document.getElementById('rev');
+  if (!q.length) {
+    const done = Object.values(syls).filter(s=>s.story).length;
+    el.innerHTML = `<div class="es"><div class="ei">${done?'✅':'📖'}</div><p>${done?'All caught up! No reviews due right now.':'Build some stories first, then come back to review them.'}</p></div>`;
+    return;
+  }
+  rQueue = q; rIdx = 0; renderRCard();
+}
+
+function renderRCard() {
+  const el = document.getElementById('rev');
+  if (rIdx >= rQueue.length) {
+    el.innerHTML = `<div class="es"><div class="ei">🏆</div><p>Session done! Reviewed ${rQueue.length} syllable${rQueue.length!==1?'s':''}.</p></div>`;
+    updateStats(); return;
+  }
+  const key = rQueue[rIdx];
+  const s = syls[key];
+  const src = ALL_SYLLABLES[key];
+  let html = `<div class="card">
+    <div class="bs">${key.toUpperCase()}</div>
+    <div class="rs">${rIdx+1} / ${rQueue.length}</div>
+    <div class="sl">What are the 4 meanings? Tap to reveal</div>`;
+  s.tones.forEach((t,i) => {
+    html += `<div class="rv" onclick="cycleRev(${i})">
+      <div class="rl"><div class="rp">${t.pinyin}</div><div class="rm" id="rm-${i}">?</div></div>
+      <span style="font-size:14px;color:var(--text3)">▾</span>
+    </div><div class="rstory" id="rs-${i}"></div>`;
+  });
+  html += `<div class="ht">tap once = meaning · tap twice = story</div>
+  <div class="sl" style="margin-top:16px">How did you do?</div>
+  <div class="gr">
+    <button class="gb" onclick="grade(0)">😬<span class="gl">missed</span></button>
+    <button class="gb" onclick="grade(1)">😐<span class="gl">got it</span></button>
+    <button class="gb" onclick="grade(2)">😎<span class="gl">easy</span></button>
+  </div></div>`;
+  el.innerHTML = html;
+  window._rt = s.tones; window._rs = s.story; window._rv = s.tones.map(()=>0);
+}
+
+function cycleRev(i) {
+  window._rv[i] = (window._rv[i]+1)%3;
+  const st = window._rv[i];
+  const me = document.getElementById('rm-'+i), se = document.getElementById('rs-'+i);
+  if (st===0) { me.textContent='?'; me.className='rm'; se.style.display='none'; }
+  else if (st===1) { me.textContent=window._rt[i].meaning; me.className='rm rev'; se.style.display='none'; }
+  else { me.textContent=window._rt[i].meaning; me.className='rm rev'; se.style.display='block'; se.textContent=window._rs; }
+}
+
+function grade(score) {
+  const srs = syls[rQueue[rIdx]].srs;
+  if (score===0) { srs.interval=1; srs.due=Date.now()+600000; }
+  else if (score===1) { srs.reps=(srs.reps||0)+1; srs.interval=srs.reps===1?1:Math.round(srs.interval*srs.ease); srs.ease=Math.max(1.3,srs.ease+0.1); srs.due=Date.now()+srs.interval*86400000; }
+  else { srs.reps=(srs.reps||0)+1; srs.interval=srs.reps===1?3:Math.round(srs.interval*(srs.ease+0.3)); srs.ease=Math.min(3.5,srs.ease+0.2); srs.due=Date.now()+srs.interval*86400000; }
+  save(); rIdx++; renderRCard();
+}
+
+function show(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  if (name==='detail') { document.getElementById('screen-detail').classList.add('active'); document.getElementById('nav-build').classList.add('active'); }
+  else { document.getElementById('screen-'+name).classList.add('active'); const nb=document.getElementById('nav-'+name); if(nb) nb.classList.add('active'); if(name==='review') showReview(); if(name==='build') renderGrid(); }
+}
+
+
+// Frequency order - most common Mandarin syllables first
+const FREQ_ORDER = [
+  'shi','yi','de','bu','zhi','le','wo','ge','ta','guo','you','ren','lai','zhe','men',
+  'shuo','dao','jiu','dou','neng','mei','ma','qi','he','ye','gao','dian','na','duo',
+  'shang','zai','jian','guo','wen','wei','hai','xiang','yao','li','ba','kan','xin',
+  'wan','dong','tian','ding','mu','zhe','hui','xian','hao','si','mo','fen','rang',
+  'chu','ben','yong','tou','ri','wu','zuo','xia','na','qing','jiang','jing','hou',
+  'chang','zhong','fa','qu','er','ru','xue','jia','jin','ta','hua','kai','ban',
+  'an','zhang','qian','yang','bei','dui','gen','fo','ting','ming','ling','xing',
+  'cong','gan','lian','mian','ran','sheng','cheng','gui','lu','nian','pian','qian',
+  'shan','tang','wan','xian','yan','zhan','jiao','liao','miao','piao','qiao','tiao',
+  'biao','diao','jian','lian','mian','pian','tian','xian','zhan','chan','fan','han',
+  'kan','lan','man','nan','pan','ran','san','tan','wan','zan','gan','dan','ban',
+  'feng','gong','hong','kong','long','song','tong','yong','zong','dong','nong','rong',
+  'cai','dai','gai','hai','kai','lai','mai','nai','pai','sai','tai','wai','zai',
+  'bei','fei','hei','lei','mei','pei','wei','zhei','gui','hui','kui','shui','tui',
+  'lou','mou','nou','pou','rou','sou','tou','you','zou','chou','dou','gou','hou',
+  'kou','liu','miu','niu','qiu','xiu','diu','jiu','zhu','chu','shu','ru','fu','gu',
+  'hu','ku','lu','mu','nu','pu','tu','wu','zu','cu','du','su','bu','pu',
+  'lang','bang','fang','gang','hang','kang','nang','pang','rang','sang','wang','yang','zang',
+  'zha','cha','sha','re','ze','ce','se','zhi','chi','ri','si','zi','ci',
+  'lv','nv','jue','que','xue','yue','lue','nue',
+  'ang','eng','ing','ong','er','ai','ei','ao','ou','an','en','in','un','vn'
+];
+
+function getSortedKeys(filter) {
+  const now = Date.now();
+  let keys = Object.keys(syls);
+  
+  if (filter === 'todo') keys = keys.filter(k => !syls[k].story);
+  else if (filter === 'done') keys = keys.filter(k => !!syls[k].story);
+  else if (filter === 'due') keys = keys.filter(k => syls[k].story && syls[k].srs.due <= now);
+  
+  // Sort by frequency order, then alphabetically for remainder
+  return keys.sort((a, b) => {
+    const ai = FREQ_ORDER.indexOf(a);
+    const bi = FREQ_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
+
+function exportStories() {
+  const data = JSON.stringify(syls, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mnemoniacs-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importStories() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        // Merge: keep existing stories, import fills in the rest
+        let count = 0;
+        for (const [k, v] of Object.entries(imported)) {
+          if (syls[k] && v.story) {
+            syls[k].story = v.story;
+            syls[k].anchor = v.anchor || '';
+            syls[k].srs = v.srs || syls[k].srs;
+            count++;
+          }
+        }
+        save();
+        renderGrid();
+        alert('Imported ' + count + ' stories successfully!');
+      } catch(e) {
+        alert('Invalid backup file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+init(); renderGrid();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
